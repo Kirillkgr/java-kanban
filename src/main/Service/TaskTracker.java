@@ -1,7 +1,7 @@
-package Service;
+package main.Service;
 
-import Enums.TypeTask;
-import Models.SubTaskModel;
+import main.Enums.TypeTask;
+import main.Models.SubTaskModel;
 
 import java.util.List;
 

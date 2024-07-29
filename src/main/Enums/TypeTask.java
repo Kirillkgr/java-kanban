@@ -1,4 +1,4 @@
-package Enums;
+package main.Enums;
 
 public enum TypeTask {
     TODO,

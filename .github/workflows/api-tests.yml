@@ -22,4 +22,4 @@ jobs:
       - name: Build and test
         run: |
           javac -d build src/*/*.java
-          java -cp build org.junit.runner.JUnitCore src.*/*.class
+          java -cp build:junit-4.13.2.jar org.junit.runner.JUnitCore src.*/*.class

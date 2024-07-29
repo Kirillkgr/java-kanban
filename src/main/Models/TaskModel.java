@@ -1,6 +1,6 @@
-package Models;
+package main.Models;
 
-import Enums.TypeTask;
+import main.Enums.TypeTask;
 
 import java.util.List;
 import java.util.UUID;

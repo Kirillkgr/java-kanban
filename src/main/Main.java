@@ -1,6 +1,7 @@
-import Service.Core;
-import Service.Impl.CoreImpl;
-import Service.Impl.TaskTrackerImpl;
+package main;
+
+import main.Service.Core;
+import main.Service.Impl.CoreImpl;
 
 public class Main {
 
