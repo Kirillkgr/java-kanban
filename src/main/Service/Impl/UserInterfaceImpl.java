@@ -1,6 +1,6 @@
-package Service.Impl;
+package main.Service.Impl;
 
-import Service.UserInterface;
+import main.Service.UserInterface;
 
 import java.util.Scanner;
 
