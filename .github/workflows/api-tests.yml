@@ -1,8 +1,25 @@
-name: Java Tests
+name: Java Testson
 
 on:
   pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    uses: yandex-praktikum/java-kanban/.github/workflows/api-tests.yml@ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Build and test
+        run: |
+          javac -d build src/*/*.java
+          java -cp build org.junit.runner.JUnitCore src.*/*.class
