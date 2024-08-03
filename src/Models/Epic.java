@@ -29,6 +29,10 @@ public class Epic extends Task {
         this.status = allDone ? TaskStatus.DONE : TaskStatus.IN_PROGRESS;
     }
 
+    public List<Subtask> getSubtasks() {
+        return this.subtasks;
+    }
+
     @Override
     public void setStatus(TaskStatus status) {
         super.setStatus(status);
