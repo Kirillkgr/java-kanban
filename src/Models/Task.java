@@ -28,6 +28,10 @@ public class Task {
         this.status = status;
     }
 
+    public void setDescription(String newDescriptions) {
+        this.description = newDescriptions;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -36,5 +40,13 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
+    }
+
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
