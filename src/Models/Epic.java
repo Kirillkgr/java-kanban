@@ -45,6 +45,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
+        this.updateStatus();
         return "#####################################\n" +
                 "Epic { " +
                 "Id = " + id + "\n" +
