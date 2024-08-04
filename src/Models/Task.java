@@ -3,14 +3,14 @@ package Models;
 import Enums.TaskStatus;
 
 public class Task {
-    private static int idCounter = 0;
+
     protected int id;
     protected String name;
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description) {
-        this.id = ++idCounter;
+    public Task(Integer id,String name, String description) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
