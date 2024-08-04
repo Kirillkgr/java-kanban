@@ -1,5 +1,4 @@
 import Enums.TaskStatus;
-import Manager.Impl.TaskTrackerImpl;
 import Manager.TaskTracker;
 import Models.Epic;
 import Models.Subtask;
@@ -8,20 +7,20 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskTracker tracker = new TaskTrackerImpl();
+        TaskTracker tracker = new TaskTracker();
 
-        Epic epic1 = new Epic("Epic 1", "Description of Epic 1");
-        tracker.addTask(epic1);
+        Epic epic1 = new Epic(TaskTracker.getNewId(), "Epic 1", "Description of Epic 1");
+        tracker.createTask(epic1);
 
-        Subtask subtask1 = new Subtask("Subtask 1", "Description of Subtask 1", epic1.getId());
-        Subtask subtask2 = new Subtask("Subtask 2", "Description of Subtask 2", epic1.getId());
+        Subtask subtask1 = new Subtask(TaskTracker.getNewId(), "Subtask 1", "Description of Subtask 1", epic1.getId());
+        Subtask subtask2 = new Subtask(TaskTracker.getNewId(), "Subtask 2", "Description of Subtask 2", epic1.getId());
 
-        tracker.addTask(subtask1);
-        tracker.addTask(subtask2);
+        tracker.createTask(subtask1);
+        tracker.createTask(subtask2);
 
         System.out.println("\nСоздалась тестовая задача с двумя под задачами\n" + tracker.getTaskById(epic1.getId()));
-        Subtask subtask3 = new Subtask("Subtask 3", "Description of Subtask 3", epic1.getId());
-        tracker.addTask(subtask3);
+        Subtask subtask3 = new Subtask(TaskTracker.getNewId(), "Subtask 3", "Description of Subtask 3", epic1.getId());
+        tracker.createTask(subtask3);
         System.out.println("\nДобавилась третия под задача\n" + tracker.getTaskById(epic1.getId()));
 
         subtask1.setStatus(TaskStatus.DONE);
@@ -33,6 +32,7 @@ public class Main {
         System.out.println("\nУдалили первый и третию подзадачу\n" + tracker.getTaskById(epic1.getId()));
 
         subtask2.setStatus(TaskStatus.DONE);
+        tracker.updateTaskStatus(subtask2);
         System.out.println("\nСменили тип второй на DONE\n" + tracker.getTaskById(epic1.getId()));
 
         System.out.println("\nВывод всех задач\n");
