@@ -1,14 +1,14 @@
 import Enums.TaskStatus;
-import Manager.Impl.TaskTrackerImpl;
-import Manager.TaskTracker;
 import Models.Epic;
 import Models.Subtask;
+import Service.Impl.TaskTrackerImpl;
+import Service.TaskTracker;
 
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskTracker tracker = new TaskTrackerImpl();
+        TaskTracker tracker = (TaskTracker) new TaskTrackerImpl();
 
         Epic epic1 = new Epic("Epic 1", "Description of Epic 1");
         tracker.addTask(epic1);

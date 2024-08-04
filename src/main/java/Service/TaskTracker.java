@@ -1,4 +1,4 @@
-package Manager;
+package Service;
 
 import Models.Task;
 import Models.Subtask;
