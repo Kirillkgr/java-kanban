@@ -85,6 +85,11 @@ jobs:
       - name: copy start.sh
         run: |
           sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -P 22 start.sh ${{ secrets.USER}}@${{ secrets.PASS}}:/root;
+          
+
+      - name: copy docker-compose
+        run: |
+          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -P 22 docker-compose.yml ${{ secrets.USER}}@${{ secrets.PASS}}:/root;
 
 
       - name: make start.sh executable
