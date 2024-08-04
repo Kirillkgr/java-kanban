@@ -81,6 +81,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: start script
+        run: |
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -P 22 ${{ secrets.USER}}@${{ secrets.PASS}} rm -rf start.sh  && rm -rf docker-compose.yml && exit;
 
       - name: copy start.sh
         run: |
