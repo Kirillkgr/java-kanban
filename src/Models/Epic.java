@@ -7,29 +7,50 @@ import java.util.List;
 
 // Класс для эпиков
 public class Epic extends Task {
-    private final List<Subtask> subtasks;
+    private ArrayList<Subtask> subtasks;
 
-    public Epic(Integer id,String name, String description) {
-        super(id,name, description);
+    public Epic(String name, String description) {
+        super(name, description);
         this.subtasks = new ArrayList<>();
     }
 
-    public void addSubtask(Subtask subtask) {
-        subtasks.add(subtask);
+
+    public void setSubtask(ArrayList<Subtask> subtasks) {
+        this.subtasks = subtasks;
     }
 
+    public void addSubtask(Subtask subtask) {
+        this.subtasks.add(subtask);
+    }
     public void updateStatus() {
+        if (subtasks.isEmpty()) {
+            this.status = TaskStatus.NEW;
+            return;
+        }
+        boolean allNew = true;
         boolean allDone = true;
         for (Subtask subtask : subtasks) {
+            if (subtask.getStatus() == TaskStatus.IN_PROGRESS) {
+                this.status = TaskStatus.IN_PROGRESS;
+                return;
+            }
+            if (subtask.getStatus() != TaskStatus.NEW) {
+                allNew = false;
+            }
             if (subtask.getStatus() != TaskStatus.DONE) {
                 allDone = false;
-                break;
             }
         }
-        this.status = allDone ? TaskStatus.DONE : TaskStatus.IN_PROGRESS;
+        if (allNew) {
+            this.status = TaskStatus.NEW;
+        } else if (allDone) {
+            this.status = TaskStatus.DONE;
+        } else {
+            this.status = TaskStatus.IN_PROGRESS;
+        }
     }
 
-    public List<Subtask> getSubtasks() {
+    public ArrayList<Subtask> getSubtasks() {
         return this.subtasks;
     }
 
@@ -40,12 +61,12 @@ public class Epic extends Task {
             for (Subtask subtask : subtasks) {
                 subtask.setStatus(TaskStatus.DONE);
             }
+            this.status = TaskStatus.DONE;
         }
     }
 
     @Override
     public String toString() {
-        this.updateStatus();
         return "#####################################\n" +
                 "Epic { " +
                 "Id = " + id + "\n" +
