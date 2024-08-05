@@ -87,7 +87,7 @@ jobs:
 
       - name: copy start.sh
         run: |
-          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -p 22 start.sh ${{ secrets.USER}}@${{ secrets.IP}}:/root;
+          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no  start.sh ${{ secrets.USER}}@${{ secrets.IP}}:/root;
         
 
 
