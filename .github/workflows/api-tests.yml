@@ -81,18 +81,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  #    - name: start script
-   #     run: |
-    #      sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -P 22 ${{ secrets.USER}}@${{ secrets.PASS}} rm -rf start.sh  && rm -rf docker-compose.yml && exit;
+      - name: remove old script
+        run: |
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.USER}}@${{ secrets.PASS}} rm -rf start.sh  && rm -rf docker-compose.yml && exit;
 
       - name: copy start.sh
         run: |
-          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -P 22 start.sh ${{ secrets.USER}}@${{ secrets.IP}}:/root;
-          
+          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -p 22 start.sh ${{ secrets.USER}}@${{ secrets.IP}}:/root;
+        
+
 
       - name: copy docker-compose
         run: |
-          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -P 22 docker-compose.yml ${{ secrets.USER}}@${{ secrets.IP}}:/root;
+          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -p 22 docker-compose.yml ${{ secrets.USER}}@${{ secrets.IP}}:/root;
 
 
       - name: make start.sh executable
@@ -101,4 +102,4 @@ jobs:
 
       - name: start script
         run: |
-          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -P 22 ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh && exit;
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh && exit;
