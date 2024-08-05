@@ -93,13 +93,13 @@ jobs:
 
       - name: copy docker-compose
         run: |
-          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no -p 22 docker-compose.yml ${{ secrets.USER}}@${{ secrets.IP}}:/root;
+          sshpass -p ${{ secrets.PASS}} scp -o StrictHostKeyChecking=no  docker-compose.yml ${{ secrets.USER}}@${{ secrets.IP}}:/root;
 
 
       - name: make start.sh executable
         run: |
-          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.USER}}@${{ secrets.IP}} chmod +x start.sh && exit;
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no   ${{ secrets.USER}}@${{ secrets.IP}} chmod +x start.sh && exit;
 
       - name: start script
         run: |
-          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh && exit;
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no   ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh && exit;
