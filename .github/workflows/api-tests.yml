@@ -102,4 +102,4 @@ jobs:
 
       - name: start script
         run: |
-          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no   ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh && exit;
+          sshpass -p ${{ secrets.PASS}} ssh -o StrictHostKeyChecking=no   ${{ secrets.USER}}@${{ secrets.PASS}} ./start.sh;
