@@ -11,26 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TaskTrackerManager {
-    /**
-     * 1. Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
-     */
-    // 1.a. Статический HashMap для хранения задач
+
     private final static HashMap<Integer, Task> tasks = new HashMap<>();
     private final static HashMap<Integer, Epic> epicTasks = new HashMap<>();
     private final static HashMap<Integer, Subtask> subTasks = new HashMap<>();
     private static int idCounter = 1;
 
-    /**
-     * Получение нового индификатора
-     */
     public static int getNewId() {
         return idCounter++;
     }
 
-    /**
-     * 2. Методы для каждого из типа задач(Задача/Эпик/Подзадача):
-     */
-    //    2.a. Получение списка всех задач.
     public List<Task> getAllTasks() {
         if (tasks.isEmpty())
             return null;
@@ -65,7 +55,6 @@ public class TaskTrackerManager {
         return taskByStatus;
     }
 
-    //    2.b. Удаление всех задач.
     public void removeAllTasks() {
         epicTasks.clear();
         subTasks.clear();
@@ -77,9 +66,7 @@ public class TaskTrackerManager {
             List<Subtask> subtaskList = epic.getSubtasks();
             for (Subtask sb : subtaskList) {
                 subTasks.remove(sb.getId());
-                tasks.remove(sb.getId());
             }
-            tasks.remove(epic.getId());
             epicTasks.remove(epic.getId());
         }
     }
@@ -92,8 +79,6 @@ public class TaskTrackerManager {
         }
     }
 
-
-    //    2.c. Получение по идентификатору.
     public Task getTaskById(int id) {
         return tasks.get(id);
     }
@@ -106,17 +91,15 @@ public class TaskTrackerManager {
         return subTasks.get(id);
     }
 
-    //    2.d. Создание. Сам объект должен передаваться в качестве параметра.
     public void createTask(Task task) {
+        task.setId(getNewId());
         tasks.put(task.getId(), task);
-
     }
 
     public Epic createEpicTask(Task task) {
         Epic epic = (Epic) task;
         epic.setId(getNewId());
         epicTasks.put(epic.getId(), epic);
-        tasks.put(epic.getId(), epic);
         return epic;
     }
 
@@ -125,14 +108,12 @@ public class TaskTrackerManager {
         Epic epic = epicTasks.get(subtask.getEpicId());
         subtask.setId(getNewId());
         subtask.setEpicId(epic.getId());
-        subTasks.put(subtask.getId(), subtask);
         epic.addSubtask(subtask);
+        subTasks.put(subtask.getId(), subtask);
         epicTasks.put(epic.getId(), epic);
-        tasks.put(task.getId(), task);
         return subtask;
     }
 
-    //    2.e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     public void updateTask(Task updatedTask) {
         tasks.put(updatedTask.getId(), updatedTask);
     }
@@ -147,7 +128,6 @@ public class TaskTrackerManager {
 
     }
 
-    //    2.f. Удаление по идентификатору.
     public void removeTaskById(int id) {
         if (epicTasks.containsKey(id)) {
             Epic epic = epicTasks.get(id);
@@ -163,10 +143,6 @@ public class TaskTrackerManager {
         } else tasks.remove(id);
     }
 
-    /**
-     * 3. Дополнительные методы:
-     */
-//  3.a. Получение списка всех подзадач определённого эпика.
     public List<Subtask> getSubtasksOfEpic(int epicId) {
         List<Subtask> subtasks = new ArrayList<>();
         if (epicTasks.containsKey(epicId)) {
@@ -175,21 +151,6 @@ public class TaskTrackerManager {
         return subtasks;
     }
 
-    /**
-     * 4. Дополнительные методы:
-     */
-// 4.a. Менеджер сам не выбирает статус для задачи.
-//          Информация о нём приходит менеджеру вместе
-//          с информацией о самой задаче. По этим данным
-//          в одних случаях он будет сохранять статус, в
-//          других будет рассчитывать.
-// 4.b. Для эпиков:
-//          если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
-//          если все подзадачи имеют статус DONE, то и эпик считается завершённым — со статусом DONE.
-//          во всех остальных случаях статус должен быть IN_PROGRESS.
-
-
-// Получение всех эпиков
     public List<Epic> getAllEpics() {
         List<Epic> epicLists = new ArrayList<>();
         for (Epic epic : epicTasks.values()) {
@@ -199,7 +160,6 @@ public class TaskTrackerManager {
         return epicLists;
     }
 
-    // Получение всех подзадач
     public Collection<Subtask> getAllSubtasks() {
         if (subTasks.isEmpty())
             return null;
