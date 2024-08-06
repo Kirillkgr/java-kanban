@@ -55,6 +55,62 @@ public class TaskTrackerManager {
         return taskByStatus;
     }
 
+    public ArrayList<Epic> getListOfEpicTasks(TaskStatus status) {
+        ArrayList<Epic> taskByStatus = new ArrayList<>();
+        switch (status) {
+            case TaskStatus.NEW -> {
+                for (Epic epic : epicTasks.values()) {
+                    if (epic.getStatus().equals(TaskStatus.NEW)) {
+                        taskByStatus.add(epic);
+                    }
+                }
+            }
+            case TaskStatus.IN_PROGRESS -> {
+                for (Epic epic : epicTasks.values()) {
+                    if (epic.getStatus().equals(TaskStatus.IN_PROGRESS)) {
+                        taskByStatus.add(epic);
+                    }
+                }
+            }
+            case TaskStatus.DONE -> {
+                for (Epic epic : epicTasks.values()) {
+                    if (epic.getStatus().equals(TaskStatus.DONE)) {
+                        taskByStatus.add(epic);
+                    }
+                }
+            }
+        }
+        return taskByStatus;
+    }
+
+    public ArrayList<Subtask> getListOfSubTasks(TaskStatus status) {
+        ArrayList<Subtask> taskByStatus = new ArrayList<>();
+        switch (status) {
+            case TaskStatus.NEW -> {
+                for (Subtask subtask : subTasks.values()) {
+                    if (subtask.getStatus().equals(TaskStatus.NEW)) {
+                        taskByStatus.add(subtask);
+                    }
+                }
+            }
+            case TaskStatus.IN_PROGRESS -> {
+                for (Subtask subtask : subTasks.values()) {
+                    if (subtask.getStatus().equals(TaskStatus.IN_PROGRESS)) {
+                        taskByStatus.add(subtask);
+                    }
+                }
+            }
+            case TaskStatus.DONE -> {
+                for (Subtask subtask : subTasks.values()) {
+                    if (subtask.getStatus().equals(TaskStatus.DONE)) {
+                        taskByStatus.add(subtask);
+                    }
+                }
+            }
+        }
+        return taskByStatus;
+    }
+
     public void removeAllTasks() {
         epicTasks.clear();
         subTasks.clear();
@@ -225,5 +281,9 @@ public class TaskTrackerManager {
     public void addTask(Task task) {
         task.setId(getNewId());
         tasks.put(task.getId(), task);
+    }
+
+    public void deleteTask(Task task) {
+        tasks.remove(task.getId());
     }
 }
