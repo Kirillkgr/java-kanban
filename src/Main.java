@@ -2,6 +2,7 @@ import Enums.TaskStatus;
 import Manager.TaskTrackerManager;
 import Models.Epic;
 import Models.Subtask;
+import Models.Task;
 
 public class Main {
 
@@ -21,6 +22,12 @@ public class Main {
 
         tracker.addSubtaskToEpic(subtask1);
         tracker.addSubtaskToEpic(subtask2);
+
+        Task task1 = new Task("Task 1", "Description task 1");
+        Task task2 = new Task("Task 2", "Description task 2");
+        tracker.addTask(task1);
+        tracker.addTask(task2);
+        System.out.println("\nСоздалась простая задача\n" + tracker.getAllTasks());
 
         System.out.println("\nСоздалась тестовая задача с двумя под задачами\n" + tracker.getTaskById(epic1.getId()));
 
@@ -52,27 +59,28 @@ public class Main {
         System.out.println("\nИзменили описаание 4 под задачи\n" + tracker.getTaskById(epic1.getId()));
 
         epic1.setDescription("This new description");
-        tracker.updateEpic(epic1);
+        epic1.updateStatus();
         System.out.println("\nИзменили изменили описание Epic\n" + tracker.getTaskById(epic1.getId()));
 
         System.out.println("\nВывод всех задач типа NEW\n" + tracker.getListOfTasks(TaskStatus.NEW).toString());
 
-        System.out.println("\nВывод всех задач типа IN_PROGRESS\n"+tracker.getListOfTasks(TaskStatus.IN_PROGRESS));
+        System.out.println("\nВывод всех задач типа IN_PROGRESS\n" + tracker.getListOfTasks(TaskStatus.IN_PROGRESS));
 
-        System.out.println("\nВывод всех задач типа DONE\n"+tracker.getListOfTasks(TaskStatus.DONE));
+        System.out.println("\nВывод всех задач типа DONE\n" + tracker.getListOfTasks(TaskStatus.DONE));
 
         System.out.println("\nПолучение всех задач под задачь используя EpicId \n" + tracker.getSubtasksOfEpic(epic1.getId()));
 
-        System.out.println("\nВывод всех задач\n"+tracker.getAllTasks());
+        System.out.println("\nВывод всех задач\n" + (tracker.getAllTasks() == null ? "Список пуст" : tracker.getAllTasks()));
 
         System.out.println("\nВывод всех Epic задачь\n" + tracker.getAllEpics());
 
-        tracker.getAllSubtasks();
-        System.out.println("\nВывод всех Subtasks задачь\n" + tracker.getAllSubtasks());
+//        tracker.getAllSubtasks();
+        System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks() == null ? "Список под задачь пуст" : tracker.getAllSubtasks()));
 
 
-
-        tracker.removeAllTasks();
+//        tracker.removeAllEpicTasks();
+        System.out.println("\nУдаление всех задачь \n" + tracker.getTaskById(epic1.getId()));
+        tracker.removeAllSubTasks();
         System.out.println("\nУдаление всех задачь \n" + tracker.getTaskById(epic1.getId()));
     }
 }

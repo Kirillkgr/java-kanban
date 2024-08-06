@@ -6,6 +6,7 @@ import Models.Task;
 import Models.Subtask;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,9 +15,9 @@ public class TaskTrackerManager {
      * 1. Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
      */
     // 1.a. Статический HashMap для хранения задач
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epicTasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> subTasks = new HashMap<>();
+    private final static HashMap<Integer, Task> tasks = new HashMap<>();
+    private final static HashMap<Integer, Epic> epicTasks = new HashMap<>();
+    private final static HashMap<Integer, Subtask> subTasks = new HashMap<>();
     private static int idCounter = 1;
 
     /**
@@ -31,6 +32,8 @@ public class TaskTrackerManager {
      */
     //    2.a. Получение списка всех задач.
     public List<Task> getAllTasks() {
+        if (tasks.isEmpty())
+            return null;
         return new ArrayList<>(tasks.values());
     }
 
@@ -70,18 +73,25 @@ public class TaskTrackerManager {
     }
 
     public void removeAllEpicTasks() {
-        removeAllTasks();
+        for (Epic epic : epicTasks.values()) {
+            List<Subtask> subtaskList = epic.getSubtasks();
+            for (Subtask sb : subtaskList) {
+                subTasks.remove(sb.getId());
+                tasks.remove(sb.getId());
+            }
+            tasks.remove(epic.getId());
+            epicTasks.remove(epic.getId());
+        }
     }
 
     public void removeAllSubTasks() {
-        for (Subtask subtask : subTasks.values()) {
-            Epic epic = epicTasks.remove(subtask.getEpicId());
-            epic.setSubtask(new ArrayList<>());
-            epic.setStatus(TaskStatus.NEW);
-            tasks.remove(subtask.getId());
-        }
         subTasks.clear();
+        for (Epic epic : epicTasks.values()) {
+            epic.getSubtasks().clear();
+            epic.updateStatus();
+        }
     }
+
 
     //    2.c. Получение по идентификатору.
     public Task getTaskById(int id) {
@@ -124,50 +134,39 @@ public class TaskTrackerManager {
 
     //    2.e. Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
     public void updateTask(Task updatedTask) {
-        if (tasks.containsKey(updatedTask.getId())) {
-            if (updatedTask instanceof Subtask subtask) {
-                if (subTasks.containsKey(((Subtask) updatedTask).getId())) {
-                    Epic epic = (Epic) epicTasks.get(subTasks.get(((Subtask) updatedTask).getEpicId()));
-                    subTasks.put(subtask.getId(), subtask);
-                    tasks.put(updatedTask.getId(), updatedTask);
-                    epic.updateStatus();
-                }
-            } else if (updatedTask instanceof Epic epic) {
-                epicTasks.put(epic.getId(), epic);
-                tasks.put(updatedTask.getId(), updatedTask);
-            }
-        }
+        tasks.put(updatedTask.getId(), updatedTask);
+    }
+
+    public void updateTask(Epic updatedTask) {
+        epicTasks.put(updatedTask.getId(), updatedTask);
+
+    }
+
+    public void updateTask(Subtask updatedTask) {
+        subTasks.put(updatedTask.getId(), updatedTask);
+
     }
 
     //    2.f. Удаление по идентификатору.
     public void removeTaskById(int id) {
-        Task task = tasks.get(id);
-        if (task instanceof Subtask) {
-            Epic epic = (Epic) tasks.get(((Subtask) task).getEpicId());
-            if (epic != null) {
-                for (Subtask subtask : epic.getSubtasks()) {
-                    if (subtask.getId() == id) {
-                        subTasks.remove(subtask.getId());
-                        tasks.remove(subtask.getId());
-                        epic.getSubtasks().remove(subtask);
-                        epicTasks.put(epic.getId(), epic);
-                        tasks.put(epic.getId(), epic);
-                    }
-                }
-                epic.updateStatus();
+        if (epicTasks.containsKey(id)) {
+            Epic epic = epicTasks.get(id);
+            for (Subtask sb : epic.getSubtasks()) {
+                subTasks.remove(sb.getId());
             }
-        } else if (task instanceof Epic) {
-            for (Subtask subtask : ((Epic) task).getSubtasks()) {
-                subTasks.remove(subtask.getId());
-                tasks.remove(subtask.getId());
+            epicTasks.remove(epic.getId());
+        } else if (subTasks.containsKey(id)) {
+            Epic epic = epicTasks.get(subTasks.get(id).getEpicId());
+            for (Subtask sb : epic.getSubtasks()) {
+                subTasks.remove(sb.getId());
             }
-        }
+        } else tasks.remove(id);
     }
 
     /**
      * 3. Дополнительные методы:
      */
-    //  3.a. Получение списка всех подзадач определённого эпика.
+//  3.a. Получение списка всех подзадач определённого эпика.
     public List<Subtask> getSubtasksOfEpic(int epicId) {
         List<Subtask> subtasks = new ArrayList<>();
         if (epicTasks.containsKey(epicId)) {
@@ -179,18 +178,18 @@ public class TaskTrackerManager {
     /**
      * 4. Дополнительные методы:
      */
-    // 4.a. Менеджер сам не выбирает статус для задачи.
-    //          Информация о нём приходит менеджеру вместе
-    //          с информацией о самой задаче. По этим данным
-    //          в одних случаях он будет сохранять статус, в
-    //          других будет рассчитывать.
-    // 4.b. Для эпиков:
-    //          если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
-    //          если все подзадачи имеют статус DONE, то и эпик считается завершённым — со статусом DONE.
-    //          во всех остальных случаях статус должен быть IN_PROGRESS.
+// 4.a. Менеджер сам не выбирает статус для задачи.
+//          Информация о нём приходит менеджеру вместе
+//          с информацией о самой задаче. По этим данным
+//          в одних случаях он будет сохранять статус, в
+//          других будет рассчитывать.
+// 4.b. Для эпиков:
+//          если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
+//          если все подзадачи имеют статус DONE, то и эпик считается завершённым — со статусом DONE.
+//          во всех остальных случаях статус должен быть IN_PROGRESS.
 
 
-    // Получение всех эпиков
+// Получение всех эпиков
     public List<Epic> getAllEpics() {
         List<Epic> epicLists = new ArrayList<>();
         for (Epic epic : epicTasks.values()) {
@@ -201,14 +200,10 @@ public class TaskTrackerManager {
     }
 
     // Получение всех подзадач
-    public List<Task> getAllSubtasks() {
-        List<Task> subtasks = new ArrayList<>();
-        for (Task task : tasks.values()) {
-            if (task instanceof Subtask) {
-                subtasks.add(task);
-            }
-        }
-        return subtasks;
+    public Collection<Subtask> getAllSubtasks() {
+        if (subTasks.isEmpty())
+            return null;
+        return subTasks.values();
     }
 
     public void updateSubtask(Subtask subtask) {
@@ -224,7 +219,6 @@ public class TaskTrackerManager {
         }
         epic.setSubtask(subtaskList);
         epic.updateStatus();
-        tasks.put(epic.getId(), epic);
     }
 
     public void updateSubtaskStatus(Subtask subtask) {
@@ -240,7 +234,6 @@ public class TaskTrackerManager {
         }
         epic.setSubtask(subtaskList);
         epic.updateStatus();
-        tasks.put(subtask.getId(), subtask);
     }
 
     public void deleteSubtask(Subtask subtask) {
@@ -251,11 +244,11 @@ public class TaskTrackerManager {
                 subtaskList.add(sb);
             } else {
                 subTasks.remove(sb.getId());
-                tasks.remove(sb.getId());
+
             }
         }
         epic.setSubtask(subtaskList);
-        tasks.put(epic.getId(), epic);
+
         epic.updateStatus();
     }
 
@@ -265,13 +258,12 @@ public class TaskTrackerManager {
         }
         Epic epic = epicTasks.get(subtask.getEpicId());
         epic.addSubtask(subtask);
-        tasks.put(subtask.getId(), subtask);
         subTasks.put(subtask.getId(), subtask);
         epicTasks.put(epic.getId(), epic);
     }
 
-    public void updateEpic(Epic epic) {
-        tasks.put(epic.getId(), epic);
-        epicTasks.put(epic.getId(), epic);
+    public void addTask(Task task) {
+        task.setId(getNewId());
+        tasks.put(task.getId(), task);
     }
 }
