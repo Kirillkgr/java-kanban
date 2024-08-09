@@ -10,7 +10,6 @@ public class Main {
         System.out.println("Поехали!");
         TaskTrackerManager tracker = new TaskTrackerManager();
 
-
         Task task1 = new Task("Task 1", "Description task 1");
         Task task2 = new Task("Task 2", "Description task 2");
 
