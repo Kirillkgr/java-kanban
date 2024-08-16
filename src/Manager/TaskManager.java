@@ -4,9 +4,10 @@ import Models.Epic;
 import Models.Subtask;
 import Models.Task;
 
+import java.util.LinkedList;
 import java.util.List;
 
-public interface TaskTrackerManager {
+public interface TaskManager {
 
 
     List<Task> getAllTasks();
@@ -46,5 +47,8 @@ public interface TaskTrackerManager {
     List<Subtask> getAllSubtasks();
 
     void updateSubtask(Subtask subtask);
+
+    LinkedList<Task> getHistory();
+
 
 }

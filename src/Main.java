@@ -1,6 +1,6 @@
 import Enums.TaskStatus;
 import Manager.Impl.InMemoryTaskManager;
-import Manager.TaskTrackerManager;
+import Manager.TaskManager;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskTrackerManager tracker = new InMemoryTaskManager();
+        TaskManager tracker = new InMemoryTaskManager();
 
         Task task1 = new Task("Task 1", "Description task 1");
         Task task2 = new Task("Task 2", "Description task 2");
