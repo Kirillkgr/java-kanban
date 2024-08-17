@@ -2,9 +2,11 @@ package Models;
 
 import Enums.TaskStatus;
 
+import java.util.Objects;
+
 public class Task {
 
-    protected int id;
+    protected Integer id;
     protected String name;
     protected String description;
     protected TaskStatus status;
@@ -15,8 +17,42 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
-    public int getId() {
+    public Task(Integer id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = TaskStatus.NEW;
+    }
+
+    public Task(Task task) {
+        this.id = task.id;
+        this.name = task.name;
+        this.description = task.description;
+        this.status = task.status;
+    }
+
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public TaskStatus getStatus() {
@@ -25,10 +61,6 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
-    }
-
-    public void setDescription(String newDescriptions) {
-        this.description = newDescriptions;
     }
 
     @Override
@@ -41,11 +73,18 @@ public class Task {
                 '}';
     }
 
-    public void setName(String newName) {
-        this.name = newName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
+
+
 }

@@ -14,6 +14,14 @@ public class Epic extends Task {
         this.subtasks = new ArrayList<>();
     }
 
+    public Epic(Epic epic) {
+        super(epic.getId(), epic.name, epic.description);
+        ArrayList<Subtask> newSubtasks = new ArrayList<>();
+        for (Subtask subtask : epic.subtasks) {
+            newSubtasks.add(new Subtask(subtask));
+        }
+        this.subtasks = newSubtasks;
+    }
 
     public void setSubtask(ArrayList<Subtask> subtasks) {
         this.subtasks = subtasks;
@@ -22,6 +30,7 @@ public class Epic extends Task {
     public void addSubtask(Subtask subtask) {
         this.subtasks.add(subtask);
     }
+
     public void updateStatus() {
         if (subtasks.isEmpty()) {
             this.status = TaskStatus.NEW;

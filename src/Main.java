@@ -1,5 +1,6 @@
 import Enums.TaskStatus;
-import Manager.TaskTrackerManager;
+import Manager.Impl.InMemoryTaskManager;
+import Manager.TaskManager;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
@@ -8,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskTrackerManager tracker = new TaskTrackerManager();
+        TaskManager tracker = new InMemoryTaskManager();
 
         Task task1 = new Task("Task 1", "Description task 1");
         Task task2 = new Task("Task 2", "Description task 2");
@@ -79,12 +80,12 @@ public class Main {
 
         System.out.println("\nПолучение всех задач под задачь используя EpicId \n" + tracker.getSubtasksOfEpic(epic1.getId()));
 
-        System.out.println("\nВывод всех задач\n" + (tracker.getAllTasks() == null ? "Список пуст" : tracker.getAllTasks()));
+        System.out.println("\nВывод всех задач\n" + (tracker.getAllTasks().isEmpty() ? "Список пуст" : tracker.getAllTasks()));
 
         System.out.println("\nВывод всех Epic задачь\n" + tracker.getAllEpics());
 
         tracker.getAllSubtasks();
-        System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks() == null ? "Список под задачь пуст" : tracker.getAllSubtasks()));
+        System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks().isEmpty() ? "Список под задачь пуст" : tracker.getAllSubtasks()));
 
         tracker.removeAllTasks();
         System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
