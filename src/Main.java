@@ -80,12 +80,12 @@ public class Main {
 
         System.out.println("\nПолучение всех задач под задачь используя EpicId \n" + tracker.getSubtasksOfEpic(epic1.getId()));
 
-        System.out.println("\nВывод всех задач\n" + (tracker.getAllTasks() == null ? "Список пуст" : tracker.getAllTasks()));
+        System.out.println("\nВывод всех задач\n" + (tracker.getAllTasks().isEmpty() ? "Список пуст" : tracker.getAllTasks()));
 
         System.out.println("\nВывод всех Epic задачь\n" + tracker.getAllEpics());
 
         tracker.getAllSubtasks();
-        System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks() == null ? "Список под задачь пуст" : tracker.getAllSubtasks()));
+        System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks().isEmpty() ? "Список под задачь пуст" : tracker.getAllSubtasks()));
 
         tracker.removeAllTasks();
         System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());

@@ -1,5 +1,6 @@
 package Manager.Impl;
 
+import Manager.HistoryManager;
 import Manager.TaskManager;
 import Models.Epic;
 import Models.Task;
@@ -12,17 +13,22 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final static HashMap<Integer, Task> tasks = new HashMap<>();
-    private final static HashMap<Integer, Epic> epicTasks = new HashMap<>();
-    private final static HashMap<Integer, Subtask> subTasks = new HashMap<>();
-    private final static LinkedList<Task> historyTask = new LinkedList<>();
+    private static HashMap<Integer, Task> tasks;
+    private static HashMap<Integer, Epic> epicTasks;
+    private static HashMap<Integer, Subtask> subTasks;
     private static int idCounter = 1;
+    private static HistoryManager historyManager;
+
+    public InMemoryTaskManager() {
+        historyManager = new InMemoryHistoryManager();
+        tasks = new HashMap<>();
+        epicTasks = new HashMap<>();
+        subTasks = new HashMap<>();
+    }
 
     @Override
     public List<Task> getAllTasks() {
-        if (tasks.isEmpty())
-            return null;
-        return new ArrayList<>(tasks.values());
+        return tasks.values().stream().toList();
     }
 
     @Override
@@ -47,17 +53,22 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
+        historyManager.addViewTask(tasks.get(id));
         return tasks.get(id);
     }
 
     @Override
     public Task getEpicTaskById(int id) {
-        return epicTasks.get(id);
+        Epic epic = epicTasks.get(id);
+        historyManager.addViewTask(epic);
+        return epic;
     }
 
     @Override
     public Task getSubTaskById(int id) {
-        return subTasks.get(id);
+        Subtask subtask = subTasks.get(id);
+        historyManager.addViewTask(subtask);
+        return subtask;
     }
 
     @Override
@@ -69,6 +80,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic createEpicTask(Epic epic) {
+        if (epic == null || !(epic instanceof Epic)) {
+            return null;
+        }
         epic.setId(getNewId());
         epicTasks.put(epic.getId(), epic);
         return epic;
@@ -76,6 +90,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask createSubTask(Subtask subtask) {
+        if (!(subtask instanceof Subtask) || epicTasks.get(subtask.getEpicId()) == null) {
+            return null;
+        }
         Epic epic = epicTasks.get(subtask.getEpicId());
         subtask.setId(getNewId());
         subtask.setEpicId(epic.getId());
@@ -167,34 +184,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
         epic.setSubtask(subtaskList);
         epic.updateStatus();
-    }
-
-    private void addViewTask(Task task) {
-        historyTask.add(task);
-        if (historyTask.size() > 10) {
-            historyTask.remove(historyTask.getFirst());
-        }
-    }
-
-    // Выдача истории с защитой от не преднамеренного изменения
-    @Override
-    public LinkedList<Task> getHistory() {
-        LinkedList<Task> actualList = new LinkedList<>();
-        for (Task task : historyTask) {
-            if (task instanceof Epic epic) {
-                // Обработка для Epic
-                actualList.push(new Epic(epic));
-            } else if (task instanceof Subtask) {
-                // Обработка для Subtask
-                Subtask subtask = new Subtask((Subtask) task);
-                actualList.push(subtask);
-            } else if (task != null) {
-                // Обработка для Task
-                Task actualTask = new Task(task);
-                actualList.push(actualTask);
-            }
-        }
-        return actualList;
     }
 
 
