@@ -4,11 +4,14 @@ import Manager.Managers;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 class TestTaskManagerAndHistoryManager {
 
@@ -19,6 +22,28 @@ class TestTaskManagerAndHistoryManager {
     void setUp() {
         historyManager = Managers.getDefaultHistory();
         taskManager = new InMemoryTaskManager();
+    }
+
+    @Test
+    void checkUpdateIdWhenCreateNewTask() { // проверьте, что экземпляры класса Task равны друг другу, если равен их id;
+        Task task1 = new Task("Task 1", "Description 1");
+        taskManager.createTask(task1);
+        Task task2 = new Task("Task 2", "Description 2");
+        taskManager.createTask(task2);
+
+        assertNotEquals(task1.getId(), task2.getId());
+
+        assertEquals(task1.getId(), 1);
+        assertEquals(task2.getId(), 2);
+
+        Epic epic = new Epic("Test epic", "Test description");
+        taskManager.createEpicTask(epic);
+        assertEquals(epic.getId(), 3);
+
+        Subtask subtask = new Subtask("Test subtask", "Test deicri[tion", epic.getId());
+        subtask = taskManager.createSubTask(subtask);
+        assertEquals(subtask.getId(), 4);
+
     }
 
     @Test
@@ -110,7 +135,7 @@ class TestTaskManagerAndHistoryManager {
 
         Task actualTask = taskManager.getTaskById(task.getId());
         Task fromHistory = historyManager.getHistory().getFirst();
-        Assertions.assertEquals(actualTask.getId(), fromHistory.getId());
-        Assertions.assertEquals("Description 1", fromHistory.getDescription());
+        assertEquals(actualTask.getId(), fromHistory.getId());
+        assertEquals("Description 1", fromHistory.getDescription());
     }
 }

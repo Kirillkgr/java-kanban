@@ -13,11 +13,11 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private static HashMap<Integer, Task> tasks;
-    private static HashMap<Integer, Epic> epicTasks;
-    private static HashMap<Integer, Subtask> subTasks;
-    private static int idCounter = 1;
-    private static HistoryManager historyManager;
+    private final HashMap<Integer, Task> tasks;
+    private final HashMap<Integer, Epic> epicTasks;
+    private final HashMap<Integer, Subtask> subTasks;
+    private int idCounter = 1;
+    private final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         historyManager = new InMemoryHistoryManager();
@@ -186,8 +186,13 @@ public class InMemoryTaskManager implements TaskManager {
         epic.updateStatus();
     }
 
+    @Override
+    public LinkedList<Task> getHistory() {
+        return historyManager.getHistory();
+    }
 
-    private static int getNewId() {
+
+    private int getNewId() {
         return idCounter++;
     }
 }
