@@ -48,6 +48,6 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-
+    LinkedList<Task> getHistory();
 
 }
