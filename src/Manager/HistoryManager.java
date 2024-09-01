@@ -6,7 +6,8 @@ import java.util.LinkedList;
 
 public interface HistoryManager {
 
-    void addViewTask(Task task);
+    void add(Task task);
+    void remove(int id);
 
     LinkedList<Task> getHistory();
 }
