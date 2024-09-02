@@ -9,55 +9,81 @@ import java.util.LinkedList;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final LinkedList<Task> historyTask;
+    private final LinkedListOfHistory<Task> historyTask;
 
     public InMemoryHistoryManager() {
-        historyTask = new LinkedList<>();
+        historyTask = new LinkedListOfHistory<>();
     }
 
+    @Override
     public void add(Task task) {
-        historyTask.push(task);
-        if (historyTask.size() > 10) {
-            historyTask.remove(historyTask.getFirst());
-        }
+        historyTask.linkLastObject(task);
     }
 
     @Override
     public void remove(int id) {
-
+        historyTask.remove(id);
     }
 
+    @Override
     public LinkedList<Task> getHistory() {
-        return historyTask;
+        return historyTask.getTasks();
     }
 
     static final class LinkedListOfHistory<T extends Task> {
         final HashMap<Integer, Node<T>> mapOfHistory;
-        private Node<T> head; // Родительский объект
-        private Node<T> last; // Дочерний объект
+        private Node<T> head;// Родительский объект
+        private Node<T> next;// Дочерний объект
 
         public LinkedListOfHistory() {
-            head = null;
-            last = null;
             mapOfHistory = new HashMap<>();
+            head = null;
+            next = null;
         }
 
-        private void linkLastObject(T object) {
-            if (last == null) {
-                Node<T> node = new Node<>(null, null, object);
-                this.head = this.last = node;
-                mapOfHistory.put(object.getId(), node);
-            } else {
-                Node<T> originalNode = this.last;
-                if (mapOfHistory.containsKey(object.getId())) {
-                    if (last.getElement().equals(object))
-                        return;
-                    // ToDO Дописать удаление объекта если он содержится в мапе
-                }
-                originalNode.setNext(last = new Node<>(originalNode, null, object));
-                mapOfHistory.put(object.getId(), last);
+        public void linkLastObject(T task) {
+            if (mapOfHistory.containsKey(task.getId())) {
+                remove(task.getId());
+            } // Если существует удаляем
+            Node<T> newNode = new Node<>(next, null, task);
+            if (next != null) {// Если существует дочерний, то указываем что следующем будит новый объект
+                next.setNext(newNode);
+            }
+                next = newNode;// Иначе новый будит дочерним
+            if (head == null) {
+                head = next;
+            }
+            mapOfHistory.put(task.getId(), newNode); // помещаем новый в мапу
+        }
+
+        public void remove(int id) {
+            Node<T> nodeToRemove = mapOfHistory.remove(id);
+            if (nodeToRemove != null) {
+                removeNode(nodeToRemove);
             }
         }
 
+        private void removeNode(Node<T> node) {
+            if (node.getPrev() != null) {
+                node.getPrev().setNext(node.getNext());
+            } else {
+                head = node.getNext();
+            }
+            if (node.getNext() != null) {
+                node.getNext().setPrev(node.getPrev());
+            } else {
+                next = node.getPrev();
+            }
+        }
+
+        public LinkedList<Task> getTasks() {
+            LinkedList<Task> tasks = new LinkedList<>();
+            Node<T> current = head;
+            while (current != null) {
+                tasks.add(current.getElement());
+                current = current.getNext();
+            }
+            return tasks;
+        }
     }
 }
