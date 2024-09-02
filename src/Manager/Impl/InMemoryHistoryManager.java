@@ -33,25 +33,25 @@ public class InMemoryHistoryManager implements HistoryManager {
     static final class LinkedListOfHistory<T extends Task> {
         final HashMap<Integer, Node<T>> mapOfHistory;
         private Node<T> head;// Родительский объект
-        private Node<T> next;// Дочерний объект
+        private Node<T> tail;// Дочерний объект
 
         public LinkedListOfHistory() {
             mapOfHistory = new HashMap<>();
             head = null;
-            next = null;
+            tail = null;
         }
 
         public void linkLastObject(T task) {
             if (mapOfHistory.containsKey(task.getId())) {
                 remove(task.getId());
             } // Если существует удаляем
-            Node<T> newNode = new Node<>(next, null, task);
-            if (next != null) {// Если существует дочерний, то указываем что следующем будит новый объект
-                next.setNext(newNode);
+            Node<T> newNode = new Node<>(tail, null, task);
+            if (tail != null) {// Если существует дочерний, то указываем что следующем будит новый объект
+                tail.setNext(newNode);
             }
-                next = newNode;// Иначе новый будит дочерним
+                tail = newNode;// Иначе новый будит дочерним
             if (head == null) {
-                head = next;
+                head = tail;
             }
             mapOfHistory.put(task.getId(), newNode); // помещаем новый в мапу
         }
@@ -72,7 +72,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             if (node.getNext() != null) {
                 node.getNext().setPrev(node.getPrev());
             } else {
-                next = node.getPrev();
+                tail = node.getPrev();
             }
         }
 
