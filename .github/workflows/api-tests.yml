@@ -21,5 +21,4 @@ jobs:
 
       - name: Build and run project
         run: |
-          javac -d build -cp src src/*.java;
-          java -cp build Main;
+          javac -d target -cp src src/*.java && java -cp target Main;
