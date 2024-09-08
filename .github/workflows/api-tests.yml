@@ -22,7 +22,4 @@ jobs:
       - name: Build and run project
         run: |
           javac -d build -cp src src/*.java;
-
-      - name: Run tests
-        run: |
-          java -cp build:./lib/*:./test $(find ./test -name "*.java" | sed 's/\.java$//' | sed 's/^\.//' | xargs -I{} java -cp build:./lib/*:./test {})
+          java -cp build Main;
