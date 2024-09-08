@@ -19,7 +19,10 @@ jobs:
           java-version: '21'
           distribution: 'adopt'
 
-      - name: Build and test
+      - name: Build and run project
         run: |
-          javac -d build -cp src src/*.java
-#          java -cp build:junit-4.13.2.jar org.junit.runner.JUnitCore src.test.*/*.class
+          javac -d build -cp src src/*.java;
+
+      - name: Run tests
+        run: |
+          java -cp build:./lib/*:./test $(find ./test -name "*.java" | sed 's/\.java$//' | sed 's/^\.//' | xargs -I{} java -cp build:./lib/*:./test {})
