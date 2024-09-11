@@ -8,8 +8,8 @@ import Models.Subtask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -53,29 +53,28 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        historyManager.addViewTask(tasks.get(id));
+        historyManager.add(tasks.get(id));
         return tasks.get(id);
     }
 
     @Override
     public Task getEpicTaskById(int id) {
         Epic epic = epicTasks.get(id);
-        historyManager.addViewTask(epic);
+        historyManager.add(epic);
         return epic;
     }
 
     @Override
     public Task getSubTaskById(int id) {
         Subtask subtask = subTasks.get(id);
-        historyManager.addViewTask(subtask);
+        historyManager.add(subtask);
         return subtask;
     }
 
     @Override
-    public Task createTask(Task task) {
+    public void createTask(Task task) {
         task.setId(getNewId());
         tasks.put(task.getId(), task);
-        return task;
     }
 
     @Override
@@ -175,7 +174,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicTasks.get(subtask.getEpicId());
         ArrayList<Subtask> subtaskList = new ArrayList<>();
         for (Subtask sb : epic.getSubtasks()) {
-            if (sb.getId() == subtask.getId()) {
+            if (Objects.equals(sb.getId(), subtask.getId())) {
                 subtaskList.remove(sb);
                 subtaskList.add(subtask);
             } else {
@@ -187,7 +186,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public LinkedList<Task> getHistory() {
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 

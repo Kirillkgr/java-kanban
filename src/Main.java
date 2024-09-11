@@ -87,6 +87,29 @@ public class Main {
         tracker.getAllSubtasks();
         System.out.println("\nВывод всех Subtasks задачь\n" + (tracker.getAllSubtasks().isEmpty() ? "Список под задачь пуст" : tracker.getAllSubtasks()));
 
+        Epic epic2 = new Epic("Epic 2", "Description of Epic 2");
+        epic2 = tracker.createEpicTask(epic2);
+
+        // 3. Запрос задач в разном порядке
+        tracker.getTaskById(task2.getId());
+        tracker.getEpicTaskById(epic2.getId());
+        tracker.getSubTaskById(subtask4.getId());
+        tracker.getTaskById(task2.getId());
+        tracker.getSubTaskById(subtask2.getId());
+
+        System.out.println("\nИстория после различных запросов:");
+        System.out.println(tracker.getHistory());
+
+        // 4. Удаление задачи, которая есть в истории, и проверка истории
+        tracker.removeTaskById(task2.getId());
+        System.out.println("\nИстория после удаления Task 2:");
+        System.out.println(tracker.getHistory());
+
+        // 5. Удаление эпика с тремя подзадачами и проверка истории
+        tracker.removeEpicById(epic2.getId());
+        System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
+        System.out.println(tracker.getHistory());
+
         tracker.removeAllTasks();
         System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
         tracker.removeAllSubTasks();

@@ -128,7 +128,7 @@ class TestTaskManagerAndHistoryManager {
     void testHistoryManagerStoresPreviousTaskVersions() {
         Task task = new Task("Task 1", "Description 1");
         taskManager.createTask(task);
-        historyManager.addViewTask(task);
+        historyManager.add(task);
 
         task.setName("Updated Task 1");
         taskManager.updateTask(task);

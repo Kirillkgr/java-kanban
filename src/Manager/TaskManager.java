@@ -4,7 +4,6 @@ import Models.Epic;
 import Models.Subtask;
 import Models.Task;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public interface TaskManager {
@@ -24,7 +23,7 @@ public interface TaskManager {
 
     Task getSubTaskById(int id);
 
-    Task createTask(Task task);
+    void createTask(Task task);
 
     Epic createEpicTask(Epic epic);
 
@@ -48,6 +47,6 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-    LinkedList<Task> getHistory();
+    List<Task> getHistory();
 
 }
