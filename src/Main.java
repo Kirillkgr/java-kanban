@@ -1,15 +1,17 @@
 import Enums.TaskStatus;
-import Manager.Impl.InMemoryTaskManager;
+import Manager.Impl.FileBackedTaskManager;
 import Manager.TaskManager;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
 
+import java.io.File;
+
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskManager tracker = new InMemoryTaskManager();
+        TaskManager tracker = new FileBackedTaskManager(new File(System.getProperty("user.home") + File.separator + "tasks.csv"));
 
         Task task1 = new Task("Task 1", "Description task 1");
         Task task2 = new Task("Task 2", "Description task 2");
