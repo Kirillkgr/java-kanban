@@ -7,4 +7,4 @@ public enum TypeTask {
     public String toString() {
         return super.toString().toUpperCase();
     }
-    }
+}
