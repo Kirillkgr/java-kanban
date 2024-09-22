@@ -6,6 +6,7 @@ import Models.Subtask;
 import Models.Task;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class Main {
 
@@ -120,5 +121,19 @@ public class Main {
         tracker.removeAllEpicTasks();
         System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 
+        // Проверка работы FileBackedTaskManager
+        FileBackedTaskManager manager1 = new FileBackedTaskManager();
+        Task taskForTestFile1 = new Task(1, "Task1", TaskStatus.NEW, "Description taskForTestFile1");
+        Epic epicForTestFile1 = new Epic(2, "Epic1", TaskStatus.NEW, "Description epicForTestFile1", new ArrayList<>());
+        manager1.addTask(taskForTestFile1);
+        manager1.addEpic(epicForTestFile1);
+
+
+        File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+
+
+        System.out.println(manager1.getTasks().equals(manager2.getTasks()));  // true
+        System.out.println(manager1.getEpicTasks().equals(manager2.getEpicTasks()));  // true
     }
 }
