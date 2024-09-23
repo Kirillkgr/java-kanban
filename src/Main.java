@@ -122,14 +122,15 @@ public class Main {
         System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 
         // Проверка работы FileBackedTaskManager
-        FileBackedTaskManager manager1 = new FileBackedTaskManager();
+        File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");
+
+        FileBackedTaskManager manager1 = new FileBackedTaskManager(file);
         Task taskForTestFile1 = new Task(1, "Task1", TaskStatus.NEW, "Description taskForTestFile1");
         Epic epicForTestFile1 = new Epic(2, "Epic1", TaskStatus.NEW, "Description epicForTestFile1", new ArrayList<>());
         manager1.addTask(taskForTestFile1);
         manager1.addEpic(epicForTestFile1);
 
 
-        File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");
         FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
 
 
