@@ -9,12 +9,14 @@ import Models.Task;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,10 +26,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public FileBackedTaskManager(File existFile) {
         checkFile(existFile);
-    }
-
-    public FileBackedTaskManager() {
-        checkFile(new File(pathToFile));
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
@@ -85,15 +83,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void checkFile(File existFile) {
         if (!existFile.exists()) {
-            System.out.println("Создание файла в пользовательской директории");
-            //+
+            System.out.println("Проверка файла на существование");
             Path path = Paths.get(pathToFile);
             try {
                 Files.createDirectories(path.getParent());
                 if (!Files.exists(path))
-                    Files.createFile(path);
+                    System.out.println("Файл не обнаружен");
             } catch (IOException e) {
-                System.out.println("Не удалось создать директорию по  причине : " + e.getMessage());
+                System.out.println("Не удалось создать директорию или файл не обнаружен");
+                System.exit(-1);
             }
         }
         load();
@@ -144,10 +142,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        /*id,type,name,status,description,epic
-          1,TASK,Task1,NEW,Description task1,
-          2,EPIC,Epic2,DONE,Description epic2,
-          3,SUBTASK,Sub Task2,DONE,Description sub task3,2*/
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile))) {
             writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC\n");
