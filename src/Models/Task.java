@@ -24,6 +24,14 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
+    public Task(Integer id, String name, TaskStatus status, String description) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.description = description;
+        this.status = TaskStatus.NEW;
+    }
+
     public Task(Task task) {
         this.id = task.id;
         this.name = task.name;
@@ -66,11 +74,11 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", description='" + description + '\'' +
+               ", status=" + status +
+               '}';
     }
 
     @Override

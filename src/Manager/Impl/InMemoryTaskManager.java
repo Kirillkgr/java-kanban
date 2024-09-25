@@ -13,11 +13,11 @@ import java.util.Objects;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final HashMap<Integer, Task> tasks;
-    private final HashMap<Integer, Epic> epicTasks;
-    private final HashMap<Integer, Subtask> subTasks;
+    private HashMap<Integer, Task> tasks;
+    private HashMap<Integer, Epic> epicTasks;
+    private HashMap<Integer, Subtask> subTasks;
     private int idCounter = 1;
-    private final HistoryManager historyManager;
+    private HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         historyManager = new InMemoryHistoryManager();
@@ -193,5 +193,37 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int getNewId() {
         return idCounter++;
+    }
+
+    public HashMap<Integer, Task> getTasks() {
+        return tasks;
+    }
+
+    public HashMap<Integer, Subtask> getSubTasks() {
+        return subTasks;
+    }
+
+    public HashMap<Integer, Epic> getEpicTasks() {
+        return epicTasks;
+    }
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
+    public void setHistoryManager(HistoryManager historyManager) {
+        this.historyManager = historyManager;
+    }
+
+    public void setTasks(HashMap<Integer, Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public void setEpicTasks(HashMap<Integer, Epic> epicTasks) {
+        this.epicTasks = epicTasks;
+    }
+
+    public void setSubTasks(HashMap<Integer, Subtask> subTasks) {
+        this.subTasks = subTasks;
     }
 }

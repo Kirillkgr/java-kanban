@@ -1,15 +1,18 @@
 import Enums.TaskStatus;
-import Manager.Impl.InMemoryTaskManager;
+import Manager.Impl.FileBackedTaskManager;
 import Manager.TaskManager;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
-        TaskManager tracker = new InMemoryTaskManager();
+        TaskManager tracker = new FileBackedTaskManager(new File(System.getProperty("user.home") + File.separator + "tasks.csv"));
 
         Task task1 = new Task("Task 1", "Description task 1");
         Task task2 = new Task("Task 2", "Description task 2");
@@ -118,5 +121,20 @@ public class Main {
         tracker.removeAllEpicTasks();
         System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 
+        // Проверка работы FileBackedTaskManager
+        File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");
+
+        FileBackedTaskManager manager1 = new FileBackedTaskManager(file);
+        Task taskForTestFile1 = new Task(1, "Task1", TaskStatus.NEW, "Description taskForTestFile1");
+        Epic epicForTestFile1 = new Epic(2, "Epic1", TaskStatus.NEW, "Description epicForTestFile1", new ArrayList<>());
+        manager1.addTask(taskForTestFile1);
+        manager1.addEpic(epicForTestFile1);
+
+
+        FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+
+
+        System.out.println(manager1.getTasks().equals(manager2.getTasks()));  // true
+        System.out.println(manager1.getEpicTasks().equals(manager2.getEpicTasks()));  // true
     }
 }
