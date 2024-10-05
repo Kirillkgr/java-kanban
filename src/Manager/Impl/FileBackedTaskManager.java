@@ -38,7 +38,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	@Override
 	public void createTask(Task task) {
 		if (isTaskTimeIntersect(task)) {
-			throw new IllegalArgumentException("Время выполнения задачи пересекается с другой задачей.");
+			System.out.println("Время выполнения задачи пересекается с другой задачей.");
 		}
 		super.createTask(task);
 		save();
@@ -166,7 +166,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 							 + task.getValue().getName() + ","
 							 + task.getValue().getStatus() + ","
 							 + task.getValue().getDescription() + ","
-							 + task.getValue().getDuration().toMinutes() + ","
+							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
 							 + task.getValue().getStartTime() + ",\n");
 			}
 			for (Map.Entry<Integer, Epic> task : getEpicTasks().entrySet()) {
@@ -174,7 +174,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 							 + task.getValue().getName() + ","
 							 + task.getValue().getStatus() + ","
 							 + task.getValue().getDescription() + ","
-							 + task.getValue().getDuration().toMinutes() + ","
+							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
 							 + task.getValue().getStartTime() + ",\n");
 			}
 			for (Map.Entry<Integer, Subtask> task : getSubTasks().entrySet()) {
@@ -182,7 +182,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 							 + task.getValue().getName() + ","
 							 + task.getValue().getStatus() + ","
 							 + task.getValue().getDescription() + ","
-							 + task.getValue().getDuration().toMinutes() + ","
+							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
 							 + task.getValue().getStartTime() + ","
 							 + task.getValue().getEpicId() + ",\n");
 			}
