@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 
 public class InMemoryTaskManager implements TaskManager {
 	
@@ -187,7 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
 			if (sb.getDuration() != null) {
 				totalTimeForSubtaskInMinutes += (sb.getDuration().getSeconds() / 60);
 			}
-			if(sb.getDuration() == null || sb.getDuration().getSeconds() < 0) {
+			if (sb.getDuration() == null || sb.getDuration().getSeconds() < 0) {
 				sb.setDuration(Duration.ofSeconds(0));
 			}
 			if (startTime != null && startTime.isAfter(sb.getStartTime())) {
@@ -214,8 +215,28 @@ public class InMemoryTaskManager implements TaskManager {
 	
 	@Override
 	public boolean isTaskTimeIntersect(Task newTask) {
-		return false;
+		return isTaskOverlap(newTask);
 	}
+	
+	public TreeSet<Task> getPrioritizedTasks() {
+		return prioritizedTasks;
+	}
+	
+	public boolean isTaskOverlap(Task newTask) {
+		if (newTask.getStartTime() == null ||
+			newTask.getDuration() == null)
+			return false;
+		
+		for (Task existingTask : getPrioritizedTasks()) {
+			if ((existingTask.getStartTime() != null || existingTask.getDuration() != null) &&
+				(newTask.getStartTime().isBefore(existingTask.getEndTime()) && newTask.getEndTime().isAfter(existingTask.getStartTime()))) {
+				return true;
+			}
+		}
+		
+		return false; // Если пересечений не найдено, возвращаем false
+	}
+	
 	
 	@Override
 	public boolean isTimeOverlap(Task task1, Task task2) {
@@ -238,4 +259,17 @@ public class InMemoryTaskManager implements TaskManager {
 	public HashMap<Integer, Epic> getEpicTasks() {
 		return epicTasks;
 	}
+	
+	private final TreeSet<Task> prioritizedTasks = new TreeSet<>((task1, task2) -> {
+		if (task1.getStartTime() == null && task2.getStartTime() == null) {
+			return Integer.compare(task1.getId(), task2.getId()); // Сравниваем по ID, если у обеих задач нет startTime
+		}
+		if (task1.getStartTime() == null) {
+			return 1; // Если у первой задачи нет startTime, она будет ниже в порядке
+		}
+		if (task2.getStartTime() == null) {
+			return -1; // Если у второй задачи нет startTime, она будет ниже в порядке
+		}
+		return task1.getStartTime().compareTo(task2.getStartTime());
+	});
 }

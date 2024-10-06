@@ -34,11 +34,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	public TreeSet<Task> getPrioritizedTasks() {
-		return prioritizedTasks;
+		return super.getPrioritizedTasks();
 	}
 	
 	@Override
 	public void createTask(Task task) {
+		super.getPrioritizedTasks().add(task);
 		super.createTask(task);
 		save();
 	}
@@ -60,7 +61,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	public void removeSubTaskById(int id) {
 		Subtask subtask = (Subtask) getSubTaskById(id);
 		if (subtask != null) {
-			prioritizedTasks.remove(subtask);
+			super.getPrioritizedTasks().remove(subtask);
 		}
 		super.removeSubTaskById(id);
 		save();
@@ -75,20 +76,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	@Override
 	public void updateSubtask(Subtask subtask) {
 		super.updateSubtask(subtask);
-		prioritizedTasks.add(subtask);
+		super.getPrioritizedTasks().add(subtask);
 		save();
 	}
 	
 	public Epic addEpic(Epic epic) {
 		super.createEpicTask(epic);
-		prioritizedTasks.add(epic);
+		super.getPrioritizedTasks().add(epic);
 		save();
 		return epic;
 	}
 	
 	public Task addTask(Task task) {
 		super.createTask(task);
-		prioritizedTasks.add(task);
+		super.getPrioritizedTasks().add(task);
 		save();
 		return task;
 	}
@@ -99,8 +100,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 			Path path = Paths.get(pathToFile);
 			try {
 				Files.createDirectories(path.getParent());
-				if (!Files.exists(path))
+				if (!Files.exists(path)) {
 					System.out.println("Файл не обнаружен");
+				} else
+					System.out.println("Файла существует");
 			} catch (FileException | IOException e) {
 				throw new FileException("Не удалось создать директорию или файл не обнаружен");
 			}
@@ -122,8 +125,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 				String description = parts[4];
 				LocalDateTime startTime = null;
 				Duration duration = null;
-				if (parts.length > 5)
-					startTime = !parts[5].isEmpty() ? LocalDateTime.parse(parts[5], formatter) : null;
+				if (parts.length > 5) startTime = !parts[5].isEmpty() ? LocalDateTime.parse(parts[5], formatter) : null;
 				if (parts.length > 6)
 					duration = !parts[6].isEmpty() ? Duration.ofMinutes(Long.parseLong(parts[6])) : null;
 				
@@ -148,19 +150,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		}
 	}
 	
-	// Метод для проверки пересечений задач по времени
-	public boolean isTaskOverlap(Task newTask) {
-		return getPrioritizedTasks().stream()
-				.anyMatch(task -> {
-					LocalDateTime newTaskEnd = newTask.getEndTime();
-					LocalDateTime existingTaskEnd = task.getEndTime();
-					return task.getStartTime() != null && newTask.getStartTime() != null &&
-						   (newTask.getStartTime().isBefore(existingTaskEnd) && newTaskEnd.isAfter(task.getStartTime()));
-				});
-	}
 	
-	
-	private void save() {
+	public void save() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile))) {
 			writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,START_TIME,DURATION,EPIC\n");
 			for (Task task : getTasks().values()) {
@@ -184,29 +175,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		if (task instanceof Subtask) {
 			epicId = ((Subtask) task).getEpicId();
 		}
-		return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
-				task.getId(),
-				task instanceof Subtask ? TypeTask.SUBTASK : (task instanceof Epic ? TypeTask.EPIC : TypeTask.TASK),
-				task.getName(),
-				task.getStatus(),
-				task.getDescription(),
-				startTime,
-				duration,
-				epicId == 0 ? "" : epicId);
+		return String.format("%d,%s,%s,%s,%s,%s,%s,%s", task.getId(), task instanceof Subtask ? TypeTask.SUBTASK : (task instanceof Epic ? TypeTask.EPIC : TypeTask.TASK), task.getName(), task.getStatus(), task.getDescription(), startTime, duration, epicId == 0 ? "" : epicId);
 	}
-	
-	private final TreeSet<Task> prioritizedTasks = new TreeSet<>((task1, task2) -> {
-		if (task1.getStartTime() == null && task2.getStartTime() == null) {
-			return Integer.compare(task1.getId(), task2.getId()); // Сравниваем по ID, если у обеих задач нет startTime
-		}
-		if (task1.getStartTime() == null) {
-			return 1; // Если у первой задачи нет startTime, она будет ниже в порядке
-		}
-		if (task2.getStartTime() == null) {
-			return -1; // Если у второй задачи нет startTime, она будет ниже в порядке
-		}
-		return task1.getStartTime().compareTo(task2.getStartTime());
-	});
 	
 	
 }

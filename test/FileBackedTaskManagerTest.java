@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.TreeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,9 +49,9 @@ public class FileBackedTaskManagerTest {
 		manager.addTask(task1);
 		manager.addTask(task2);
 		
-		List<Task> sortedTasks = manager.getAllSortedTasks();
-		assertEquals(task2, sortedTasks.get(0)); // task2 должен быть первым
-		assertEquals(task1, sortedTasks.get(1)); // task1 должен быть вторым
+		TreeSet<Task> sortedTasks = manager.getPrioritizedTasks();
+		assertEquals(task2, sortedTasks.getFirst()); // task2 должен быть первым
+		assertEquals(task1, sortedTasks.getLast()); // task1 должен быть вторым
 	}
 	
 	@Test
@@ -58,13 +59,12 @@ public class FileBackedTaskManagerTest {
 		Task task1 = new Task("Task 1", "Description 1");
 		task1.setStartTime(LocalDateTime.of(2024, 10, 1, 10, 0));
 		task1.setDuration(Duration.ofMinutes(30));
+		manager.createTask(task1);
 		
 		Task task2 = new Task("Task 2", "Description 2");
 		task2.setStartTime(LocalDateTime.of(2024, 10, 1, 10, 15)); // пересекается с task1
 		task2.setDuration(Duration.ofMinutes(30));
-		
-		manager.addTask(task1);
-		manager.addTask(task2);
+		manager.createTask(task2);
 		
 		assertTrue(manager.isTaskTimeIntersect(task2));
 	}
