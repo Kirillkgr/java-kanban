@@ -207,6 +207,21 @@ public class InMemoryTaskManager implements TaskManager {
 		return historyManager.getHistory();
 	}
 	
+	@Override
+	public boolean isSubtaskTimeIntersect(Subtask newSubtask) {
+		return false;
+	}
+	
+	@Override
+	public boolean isTaskTimeIntersect(Task newTask) {
+		return false;
+	}
+	
+	@Override
+	public boolean isTimeOverlap(Task task1, Task task2) {
+		return false;
+	}
+	
 	
 	private int getNewId() {
 		return idCounter++;
