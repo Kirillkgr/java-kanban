@@ -95,6 +95,8 @@ public class InMemoryTaskManager implements TaskManager {
 		Epic epic = epicTasks.get(subtask.getEpicId());
 		subtask.setId(getNewId());
 		subtask.setEpicId(epic.getId());
+		subtask.setStartTime(epic.getStartTime());
+		subtask.setDuration(subtask.getDuration());
 		epic.addSubtask(subtask);
 		subTasks.put(subtask.getId(), subtask);
 		epic.updateStatus();
@@ -214,7 +216,9 @@ public class InMemoryTaskManager implements TaskManager {
 		LocalDateTime end1 = task1.getEndTime();
 		LocalDateTime start2 = task2.getStartTime();
 		LocalDateTime end2 = task2.getEndTime();
-		
+		if (start1 == null || end1 == null || start2 == null || end2 == null) {
+			return false;
+		}
 		// Проверяем пересечения временных интервалов
 		return start1.isBefore(end2) && start2.isBefore(end1);
 	}

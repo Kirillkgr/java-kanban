@@ -72,7 +72,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	
 	public void updateSubtask(Subtask subtask) {
 		if (isSubtaskTimeIntersect(subtask)) {
-			throw new IllegalArgumentException("Время выполнения задачи пересекается с другой задачей.");
+			System.out.println("Время выполнения задачи пересекается с другой задачей.");
 		}
 		super.updateSubtask(subtask);
 		save();
@@ -110,18 +110,31 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		HashMap<Integer, Task> tasks = new HashMap<>();
 		HashMap<Integer, Epic> epicTasks = new HashMap<>();
 		HashMap<Integer, Subtask> subTasks = new HashMap<>();
+		
 		try (BufferedReader reader = new BufferedReader(new FileReader(pathToFile))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if (line.contains("ID")) continue;
+				if (line.contains("ID")) continue;  // Пропуск заголовка
 				String[] parts = line.split(",");
+				
+				// Проверка количества элементов
+				if (parts.length < 6) {
+					System.out.println("Строка содержит недостаточно данных: " + line);
+					continue; // Пропуск некорректных строк
+				}
+				
 				int id = Integer.parseInt(parts[0]);
 				String type = parts[1];
 				String name = parts[2];
 				String status = parts[3];
 				String description = parts[4];
-				long durationMinutes = Long.parseLong(parts[5]);
-				LocalDateTime startTime = LocalDateTime.parse(parts[6]);  // Изменение на LocalDateTime
+				
+				// Обработка duration и startTime
+				long durationMinutes = parts[5].isEmpty() ? 0 : Long.parseLong(parts[5]);
+				LocalDateTime startTime = (parts.length > 6 && !parts[6].isEmpty() && !parts[6].equals("null"))
+						? LocalDateTime.parse(parts[6])
+						: null;
+				
 				int epicId = parts.length > 7 && !parts[7].isEmpty() ? Integer.parseInt(parts[7]) : 0;
 				
 				if (type.equals(TypeTask.TASK.name())) {
@@ -153,7 +166,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 			setSubTasks(subTasks);
 			setEpicTasks(epicTasks);
 		} catch (IOException e) {
-			System.out.println("Не удалось загрузить задачи из файла: " + e.getMessage());
+			System.out.println("Не удалось загрузить задачи из файла: " + e.getMessage());
+		} catch (NumberFormatException e) {
+			System.out.println("Ошибка при преобразовании числа: " + e.getMessage());
 		}
 	}
 	
@@ -161,35 +176,62 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	public void save() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile))) {
 			writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,DURATION,START_TIME,EPIC\n");
+			
+			// Сохранение обычных задач
 			for (Map.Entry<Integer, Task> task : getTasks().entrySet()) {
-				writer.write(task.getKey() + "," + TypeTask.TASK.toString() + ","
-							 + task.getValue().getName() + ","
-							 + task.getValue().getStatus() + ","
-							 + task.getValue().getDescription() + ","
-							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
-							 + task.getValue().getStartTime() + ",\n");
+				String formatTask = formatTaskForSave(task.getValue());
+				writer.write(formatTask + "\n");
 			}
-			for (Map.Entry<Integer, Epic> task : getEpicTasks().entrySet()) {
-				writer.write(task.getKey() + "," + TypeTask.EPIC.toString() + ","
-							 + task.getValue().getName() + ","
-							 + task.getValue().getStatus() + ","
-							 + task.getValue().getDescription() + ","
-							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
-							 + task.getValue().getStartTime() + ",\n");
+			
+			// Сохранение эпиков с пересчётом времени
+			for (Map.Entry<Integer, Epic> epicEntry : getEpicTasks().entrySet()) {
+				Epic epic = epicEntry.getValue();
+				// Пересчёт времени эпика
+				calculateEpicDurationAndStartTime(epic);
+				writer.write(formatTaskForSave(epic) + "\n");
 			}
-			for (Map.Entry<Integer, Subtask> task : getSubTasks().entrySet()) {
-				writer.write(task.getKey() + "," + TypeTask.SUBTASK.toString() + ","
-							 + task.getValue().getName() + ","
-							 + task.getValue().getStatus() + ","
-							 + task.getValue().getDescription() + ","
-							 + (task.getValue().getDuration() == null ? 0 : task.getValue().getDuration().toMinutes()) + ","
-							 + task.getValue().getStartTime() + ","
-							 + task.getValue().getEpicId() + ",\n");
+			
+			// Сохранение подзадач
+			for (Map.Entry<Integer, Subtask> subtaskEntry : getSubTasks().entrySet()) {
+				writer.write(formatTaskForSave(subtaskEntry.getValue()) + "\n");
 			}
 		} catch (IOException e) {
 			System.out.println("Failed to save tasks to file: " + e.getMessage());
 		}
 	}
+	
+	// Форматирование задачи для записи
+	private String formatTaskForSave(Task task) {
+		return String.join(",",
+				String.valueOf(task.getId()),
+				task instanceof Subtask ? TypeTask.SUBTASK.name() : (task instanceof Epic ? TypeTask.EPIC.name() : TypeTask.TASK.name()),
+				task.getName(),
+				task.getStatus().name(),
+				task.getDescription(),
+				task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "",
+				task.getStartTime() != null ? task.getStartTime().toString() : "",
+				task instanceof Subtask ? String.valueOf(((Subtask) task).getEpicId()) : ""
+		);
+	}
+	
+	// Пересчёт длительности и времени начала эпика
+	private void calculateEpicDurationAndStartTime(Epic epic) {
+		List<Subtask> subtasks = epic.getSubtasks();
+		long totalDuration = subtasks.stream()
+				.filter(subtask -> subtask.getDuration() != null)
+				.mapToLong(subtask -> subtask.getDuration().toMinutes())
+				.sum();
+		epic.setDuration(Duration.ofMinutes(totalDuration));
+		
+		// Установка времени начала эпика по минимальному времени подзадач
+		LocalDateTime earliestStartTime = subtasks.stream()
+				.filter(subtask -> subtask.getStartTime() != null)
+				.map(Subtask::getStartTime)
+				.min(LocalDateTime::compareTo)
+				.orElse(null);
+		epic.setStartTime(earliestStartTime);
+	}
+	
 	
 	public List<Task> getSortedTasks() {
 		return getTasks().values().stream()
