@@ -4,6 +4,7 @@ import Manager.TaskManager;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
+
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,21 +16,20 @@ public class Main {
 		System.out.println("Поехали!");
 		TaskManager tracker = new FileBackedTaskManager(new File(System.getProperty("user.home") + File.separator + "tasks.csv"));
 		
-		LocalDateTime now = LocalDateTime.now();
 		Task task1 = new Task("Task 1", "Description task 1");
 		Task task2 = new Task("Task 2", "Description task 2");
 		
-		// Установка времени и продолжительности для задач
-		task1.setStartTime(now.plusMinutes(10));
-		task1.setDuration(Duration.ofMinutes(30));
 		
-		task2.setStartTime(now.plusHours(1)); // Пересекается с task1
-		task2.setDuration(Duration.ofMinutes(30));
+		task1.setStartTime(LocalDateTime.now());
+		task1.setDuration(Duration.ofMinutes(60));
+		
+		task2.setStartTime(LocalDateTime.now().plusHours(2));
+		task2.setDuration(Duration.ofMinutes(90));
 		
 		tracker.createTask(task1);
 		tracker.createTask(task2);
 		
-		System.out.println("\nСоздалась первая и вторая простая задача\n" + tracker.getAllTasks());
+		System.out.println("\nСоздалась первая и  вторая простая задача\n" + tracker.getAllTasks());
 		task1.setDescription("new Description");
 		
 		tracker.updateTask(task2);
@@ -38,24 +38,34 @@ public class Main {
 		tracker.removeTaskById(task1.getId());
 		System.out.println("\nУдалилась первая простая задача\n" + tracker.getAllTasks());
 		
-		LocalDateTime startEpic = LocalDateTime.of(2024, 10, 1, 10, 0);
 		
-		Epic epic1 = new Epic("Epic 1", "Description of Epic 1", startEpic);
+		Epic epic1 = new Epic("Epic 1", "Description of Epic 1");
 		epic1 = tracker.createEpicTask(epic1);
-		Subtask subtask1 = new Subtask("Subtask 1", "Description of Subtask 1", epic1.getId(), 10);
-		Subtask subtask2 = new Subtask("Subtask 2", "Description of Subtask 2", epic1.getId(), 29);
-		Subtask subtask3 = new Subtask("Subtask 3", "Description of Subtask 3", epic1.getId(), 50);
-//        subtask1.setEpicId(epic1.getId());
-//        subtask2.setEpicId(epic1.getId());
-//        subtask3.setEpicId(epic1.getId());
+		Subtask subtask1 = new Subtask("Subtask 1", "Description of Subtask 1", epic1.getId());
+		Subtask subtask2 = new Subtask("Subtask 2", "Description of Subtask 2", epic1.getId());
+		Subtask subtask3 = new Subtask("Subtask 3", "Description of Subtask 3", epic1.getId());
+		
+		subtask1.setStartTime(LocalDateTime.now().plusHours(1));
+		subtask1.setDuration(Duration.ofMinutes(45));
+		
+		subtask2.setStartTime(LocalDateTime.now().plusHours(3));
+		subtask2.setDuration(Duration.ofMinutes(30));
+		
+		subtask3.setStartTime(LocalDateTime.now().plusHours(4));
+		subtask3.setDuration(Duration.ofMinutes(120));
+		
+		subtask1.setEpicId(epic1.getId());
+		subtask2.setEpicId(epic1.getId());
+		subtask3.setEpicId(epic1.getId());
 		
 		tracker.createSubTask(subtask1);
 		tracker.createSubTask(subtask2);
 		
 		System.out.println("\nСоздалась тестовая задача с двумя под задачами\n" + tracker.getEpicTaskById(epic1.getId()));
 		
+		
 		tracker.createSubTask(subtask3);
-		System.out.println("\nДобавилась третья под задача\n" + tracker.getEpicTaskById(epic1.getId()));
+		System.out.println("\nДобавилась третия под задача\n" + tracker.getEpicTaskById(epic1.getId()));
 		
 		subtask1.setStatus(TaskStatus.DONE);
 		subtask2.setStatus(TaskStatus.IN_PROGRESS);
@@ -65,7 +75,7 @@ public class Main {
 		
 		tracker.removeSubTaskById(subtask1.getId());
 		tracker.removeSubTaskById(subtask3.getId());
-		System.out.println("\nУдалили первый и третью подзадачу\n" + tracker.getEpicTaskById(epic1.getId()));
+		System.out.println("\nУдалили первый и третию подзадачу\n" + tracker.getEpicTaskById(epic1.getId()));
 		
 		subtask2.setStatus(TaskStatus.DONE);
 		tracker.updateSubtask(subtask2);
@@ -78,7 +88,7 @@ public class Main {
 		
 		subtask4.setDescription("This new description");
 		tracker.updateSubtask(subtask4);
-		System.out.println("\nИзменили описание 4 под задачи\n" + tracker.getEpicTaskById(epic1.getId()));
+		System.out.println("\nИзменили описаание 4 под задачи\n" + tracker.getEpicTaskById(epic1.getId()));
 		
 		epic1.setDescription("This new description");
 		epic1.updateStatus();
@@ -112,42 +122,48 @@ public class Main {
 		System.out.println("\nИстория после различных запросов:");
 		System.out.println(tracker.getHistory());
 		
-		// 4. Удаление задачи, которая есть в истории, и проверка истории
-		tracker.removeTaskById(task2.getId());
-		System.out.println("\nИстория после удаления Task 2:");
-		System.out.println(tracker.getHistory());
-		
-		// 5. Удаление эпика с тремя подзадачами и проверка истории
-		tracker.removeEpicById(epic2.getId());
-		System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
-		System.out.println(tracker.getHistory());
-		
-		tracker.removeAllTasks();
-		System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
-		tracker.removeAllSubTasks();
-		System.out.println("\nУдаление всех Subtask задачь \n" + tracker.getAllSubtasks());
-		
-		tracker.removeAllEpicTasks();
-		System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
+//		// 4. Удаление задачи, которая есть в истории, и проверка истории
+//		tracker.removeTaskById(task2.getId());
+//		System.out.println("\nИстория после удаления Task 2:");
+//		System.out.println(tracker.getHistory());
+//
+//		// 5. Удаление эпика с тремя подзадачами и проверка истории
+//		tracker.removeEpicById(epic2.getId());
+//		System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
+//		System.out.println(tracker.getHistory());
+//
+//		tracker.removeAllTasks();
+//		System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
+//		tracker.removeAllSubTasks();
+//		System.out.println("\nУдаление всех Subtask задачь \n" + tracker.getAllSubtasks());
+//
+//		tracker.removeAllEpicTasks();
+//		System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 		
 		// Проверка работы FileBackedTaskManager
 		File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");
 		
 		FileBackedTaskManager manager1 = new FileBackedTaskManager(file);
-		Task taskForTestFile1 = new Task(1, "Task1", TaskStatus.NEW, "Description taskForTestFile1");
-		Epic epicForTestFile1 = new Epic(2, "Epic1", TaskStatus.NEW, "Description epicForTestFile1", new ArrayList<>());
+		Task taskForTestFile1 = new Task(1, "taskForTestFile 1", TaskStatus.NEW, "Description taskForTestFile1");
+		Epic epicForTestFile1 = new Epic(2, "epicForTestFile 1", TaskStatus.NEW, "Description epicForTestFile1",new ArrayList<>());
+		
+		taskForTestFile1.setDuration(Duration.ofMinutes(4));
+		taskForTestFile1.setStartTime(LocalDateTime.now());
+		
+		Subtask subTaskForTestFile = new Subtask(1, "SubTaskForTestFile 1", TaskStatus.NEW, "Description taskForTestFile1",epicForTestFile1.getId());
+		subTaskForTestFile.setDuration(Duration.ofMinutes(4));
+		subTaskForTestFile.setStartTime(LocalDateTime.now());
+		
+		epicForTestFile1.addSubtask(subTaskForTestFile);
+		
 		manager1.addTask(taskForTestFile1);
 		manager1.addEpic(epicForTestFile1);
 		
+		
 		FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(file);
+		
 		
 		System.out.println(manager1.getTasks().equals(manager2.getTasks()));  // true
 		System.out.println(manager1.getEpicTasks().equals(manager2.getEpicTasks()));  // true
-		
-		if (tracker.isTaskTimeIntersect(task1)) {
-			System.out.println("Временные рамки задач пересекаются: " + task1.getName() + " и " + task2.getName());
-		} else {
-			System.out.println("Временные рамки задач не пересекаются: " + task1.getName() + " и " + task2.getName());
-		}
 	}
 }

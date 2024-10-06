@@ -2,9 +2,11 @@ package Manager.Impl;
 
 import Enums.TaskStatus;
 import Enums.TypeTask;
+import Exeptions.FileException;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,30 +18,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.time.format.DateTimeFormatter;
+import java.util.TreeSet;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 	private final String pathToFile = System.getProperty("user.home") + File.separator + "tasks.csv";
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	
 	public FileBackedTaskManager(File existFile) {
 		checkFile(existFile);
 	}
 	
-	public static FileBackedTaskManager loadFromFile(File file) {
-		return new FileBackedTaskManager(file);
+	public static FileBackedTaskManager loadFromFile(File existFile) {
+		return new FileBackedTaskManager(existFile);
+	}
+	
+	public TreeSet<Task> getPrioritizedTasks() {
+		return prioritizedTasks;
 	}
 	
 	@Override
 	public void createTask(Task task) {
-		if (isTaskTimeIntersect(task)) {
-			System.out.println("Время выполнения задачи пересекается с другой задачей.");
-		}
 		super.createTask(task);
 		save();
 	}
@@ -59,6 +58,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	
 	@Override
 	public void removeSubTaskById(int id) {
+		Subtask subtask = (Subtask) getSubTaskById(id);
+		if (subtask != null) {
+			prioritizedTasks.remove(subtask);
+		}
 		super.removeSubTaskById(id);
 		save();
 	}
@@ -69,23 +72,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		save();
 	}
 	
-	
+	@Override
 	public void updateSubtask(Subtask subtask) {
-		if (isSubtaskTimeIntersect(subtask)) {
-			System.out.println("Время выполнения задачи пересекается с другой задачей.");
-		}
 		super.updateSubtask(subtask);
+		prioritizedTasks.add(subtask);
 		save();
 	}
 	
 	public Epic addEpic(Epic epic) {
 		super.createEpicTask(epic);
+		prioritizedTasks.add(epic);
 		save();
 		return epic;
 	}
 	
 	public Task addTask(Task task) {
 		super.createTask(task);
+		prioritizedTasks.add(task);
 		save();
 		return task;
 	}
@@ -98,167 +101,112 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 				Files.createDirectories(path.getParent());
 				if (!Files.exists(path))
 					System.out.println("Файл не обнаружен");
-			} catch (IOException e) {
-				System.out.println("Не удалось создать директорию или файл не обнаружен");
-				System.exit(-1);
+			} catch (FileException | IOException e) {
+				throw new FileException("Не удалось создать директорию или файл не обнаружен");
 			}
 		}
 		load();
 	}
 	
+	// Обновляем метод загрузки с учетом новых полей
 	private void load() {
-		HashMap<Integer, Task> tasks = new HashMap<>();
-		HashMap<Integer, Epic> epicTasks = new HashMap<>();
-		HashMap<Integer, Subtask> subTasks = new HashMap<>();
-		
 		try (BufferedReader reader = new BufferedReader(new FileReader(pathToFile))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if (line.contains("ID")) continue;  // Пропуск заголовка
+				if (line.contains("ID")) continue;
 				String[] parts = line.split(",");
-				
-				// Проверка количества элементов
-				if (parts.length < 6) {
-					System.out.println("Строка содержит недостаточно данных: " + line);
-					continue; // Пропуск некорректных строк
-				}
-				
 				int id = Integer.parseInt(parts[0]);
 				String type = parts[1];
 				String name = parts[2];
 				String status = parts[3];
 				String description = parts[4];
-				
-				// Обработка duration и startTime
-				long durationMinutes = parts[5].isEmpty() ? 0 : Long.parseLong(parts[5]);
-				LocalDateTime startTime = (parts.length > 6 && !parts[6].isEmpty() && !parts[6].equals("null"))
-						? LocalDateTime.parse(parts[6])
-						: null;
-				
-				int epicId = parts.length > 7 && !parts[7].isEmpty() ? Integer.parseInt(parts[7]) : 0;
+				LocalDateTime startTime = null;
+				Duration duration = null;
+				if (parts.length > 5)
+					startTime = !parts[5].isEmpty() ? LocalDateTime.parse(parts[5], formatter) : null;
+				if (parts.length > 6)
+					duration = !parts[6].isEmpty() ? Duration.ofMinutes(Long.parseLong(parts[6])) : null;
 				
 				if (type.equals(TypeTask.TASK.name())) {
-					Task task = new Task(id, name, TaskStatus.valueOf(status), description);
-					task.setDuration(Duration.ofMinutes(durationMinutes));
-					task.setStartTime(startTime);
-					tasks.put(task.getId(), task);
+					Task task = new Task(id, name, description, TaskStatus.valueOf(status), duration, startTime);
+					getTasks().put(task.getId(), task);
 				}
 				
 				if (type.equals(TypeTask.SUBTASK.name())) {
-					Subtask subtask = new Subtask(id, name, TaskStatus.valueOf(status), description, epicId);
-					subtask.setDuration(Duration.ofMinutes(durationMinutes));
-					subtask.setStartTime(startTime);
-					subTasks.put(subtask.getId(), subtask);
+					int epicId = Integer.parseInt(parts[7]);
+					Subtask subtask = new Subtask(id, name, description, TaskStatus.valueOf(status), duration, startTime, epicId);
+					getSubTasks().put(subtask.getId(), subtask);
 				}
 				
 				if (type.equals(TypeTask.EPIC.name())) {
-					ArrayList<Subtask> subtaskList = new ArrayList<>();
-					for (Subtask subtask : subTasks.values()) {
-						if (subtask.getEpicId() == id) subtaskList.add(subtask);
-					}
-					Epic epic = new Epic(id, name, TaskStatus.valueOf(status), description, subtaskList);
-					epic.setDuration(Duration.ofMinutes(durationMinutes));
-					epic.setStartTime(startTime);
-					epicTasks.put(epic.getId(), epic);
+					Epic epic = new Epic(id, name, TaskStatus.valueOf(status), description, duration, startTime);
+					getEpicTasks().put(epic.getId(), epic);
 				}
 			}
-			setTasks(tasks);
-			setSubTasks(subTasks);
-			setEpicTasks(epicTasks);
 		} catch (IOException e) {
 			System.out.println("Не удалось загрузить задачи из файла: " + e.getMessage());
-		} catch (NumberFormatException e) {
-			System.out.println("Ошибка при преобразовании числа: " + e.getMessage());
 		}
 	}
 	
+	// Метод для проверки пересечений задач по времени
+	public boolean isTaskOverlap(Task newTask) {
+		return getPrioritizedTasks().stream()
+				.anyMatch(task -> {
+					LocalDateTime newTaskEnd = newTask.getEndTime();
+					LocalDateTime existingTaskEnd = task.getEndTime();
+					return task.getStartTime() != null && newTask.getStartTime() != null &&
+						   (newTask.getStartTime().isBefore(existingTaskEnd) && newTaskEnd.isAfter(task.getStartTime()));
+				});
+	}
 	
-	public void save() {
+	
+	private void save() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile))) {
-			writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,DURATION,START_TIME,EPIC\n");
-			
-			// Сохранение обычных задач
-			for (Map.Entry<Integer, Task> task : getTasks().entrySet()) {
-				String formatTask = formatTaskForSave(task.getValue());
-				writer.write(formatTask + "\n");
+			writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,START_TIME,DURATION,EPIC\n");
+			for (Task task : getTasks().values()) {
+				writer.write(taskToString(task) + "\n");
 			}
-			
-			// Сохранение эпиков с пересчётом времени
-			for (Map.Entry<Integer, Epic> epicEntry : getEpicTasks().entrySet()) {
-				Epic epic = epicEntry.getValue();
-				// Пересчёт времени эпика
-				calculateEpicDurationAndStartTime(epic);
-				writer.write(formatTaskForSave(epic) + "\n");
+			for (Epic epic : getEpicTasks().values()) {
+				writer.write(taskToString(epic) + "\n");
 			}
-			
-			// Сохранение подзадач
-			for (Map.Entry<Integer, Subtask> subtaskEntry : getSubTasks().entrySet()) {
-				writer.write(formatTaskForSave(subtaskEntry.getValue()) + "\n");
+			for (Subtask subtask : getSubTasks().values()) {
+				writer.write(taskToString(subtask) + "\n");
 			}
 		} catch (IOException e) {
 			System.out.println("Failed to save tasks to file: " + e.getMessage());
 		}
 	}
 	
-	// Форматирование задачи для записи
-	private String formatTaskForSave(Task task) {
-		return String.join(",",
-				String.valueOf(task.getId()),
-				task instanceof Subtask ? TypeTask.SUBTASK.name() : (task instanceof Epic ? TypeTask.EPIC.name() : TypeTask.TASK.name()),
+	public String taskToString(Task task) {
+		String startTime = (task.getStartTime() != null) ? task.getStartTime().format(formatter) : "";
+		String duration = (task.getDuration() != null) ? String.valueOf(task.getDuration().toMinutes()) : "";
+		int epicId = 0;
+		if (task instanceof Subtask) {
+			epicId = ((Subtask) task).getEpicId();
+		}
+		return String.format("%d,%s,%s,%s,%s,%s,%s,%s",
+				task.getId(),
+				task instanceof Subtask ? TypeTask.SUBTASK : (task instanceof Epic ? TypeTask.EPIC : TypeTask.TASK),
 				task.getName(),
-				task.getStatus().name(),
+				task.getStatus(),
 				task.getDescription(),
-				task.getDuration() != null ? String.valueOf(task.getDuration().toMinutes()) : "",
-				task.getStartTime() != null ? task.getStartTime().toString() : "",
-				task instanceof Subtask ? String.valueOf(((Subtask) task).getEpicId()) : ""
-		);
+				startTime,
+				duration,
+				epicId == 0 ? "" : epicId);
 	}
 	
-	// Пересчёт длительности и времени начала эпика
-	private void calculateEpicDurationAndStartTime(Epic epic) {
-		List<Subtask> subtasks = epic.getSubtasks();
-		long totalDuration = subtasks.stream()
-				.filter(subtask -> subtask.getDuration() != null)
-				.mapToLong(subtask -> subtask.getDuration().toMinutes())
-				.sum();
-		epic.setDuration(Duration.ofMinutes(totalDuration));
-		
-		// Установка времени начала эпика по минимальному времени подзадач
-		LocalDateTime earliestStartTime = subtasks.stream()
-				.filter(subtask -> subtask.getStartTime() != null)
-				.map(Subtask::getStartTime)
-				.min(LocalDateTime::compareTo)
-				.orElse(null);
-		epic.setStartTime(earliestStartTime);
-	}
+	private final TreeSet<Task> prioritizedTasks = new TreeSet<>((task1, task2) -> {
+		if (task1.getStartTime() == null && task2.getStartTime() == null) {
+			return Integer.compare(task1.getId(), task2.getId()); // Сравниваем по ID, если у обеих задач нет startTime
+		}
+		if (task1.getStartTime() == null) {
+			return 1; // Если у первой задачи нет startTime, она будет ниже в порядке
+		}
+		if (task2.getStartTime() == null) {
+			return -1; // Если у второй задачи нет startTime, она будет ниже в порядке
+		}
+		return task1.getStartTime().compareTo(task2.getStartTime());
+	});
 	
 	
-	public List<Task> getSortedTasks() {
-		return getTasks().values().stream()
-				.sorted(Comparator.comparing(Task::getStartTime)) // сортировка по времени начала
-				.collect(Collectors.toList());
-	}
-	
-	public List<Task> getAllSortedTasks() {
-		return Stream.concat(
-						Stream.concat(getTasks().values().stream(), getEpicTasks().values().stream()),
-						getSubTasks().values().stream()
-				)
-				.sorted(Comparator.comparing(Task::getStartTime)) // сортировка по времени начала
-				.collect(Collectors.toList());
-	}
-	
-	
-	public boolean isSubtaskTimeIntersect(Subtask newSubtask) {
-		return super.isSubtaskTimeIntersect(newSubtask);
-	}
-	
-	
-	public boolean isTaskTimeIntersect(Task newTask) {
-		return super.isTaskTimeIntersect(newTask);
-	}
-	
-	public boolean isTimeOverlap(Task task1, Task task2) {
-		return super.isTimeOverlap(task1, task2);
-	}
 }

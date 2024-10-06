@@ -3,8 +3,10 @@ package Manager.Impl;
 import Manager.HistoryManager;
 import Manager.TaskManager;
 import Models.Epic;
-import Models.Subtask;
 import Models.Task;
+import Models.Subtask;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,8 +97,6 @@ public class InMemoryTaskManager implements TaskManager {
 		Epic epic = epicTasks.get(subtask.getEpicId());
 		subtask.setId(getNewId());
 		subtask.setEpicId(epic.getId());
-		subtask.setStartTime(epic.getStartTime());
-		subtask.setDuration(subtask.getDuration());
 		epic.addSubtask(subtask);
 		subTasks.put(subtask.getId(), subtask);
 		epic.updateStatus();
@@ -174,6 +174,8 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public void updateSubtask(Subtask subtask) {
 		Epic epic = epicTasks.get(subtask.getEpicId());
+		long totalTimeForSubtaskInMinutes = 0;
+		LocalDateTime startTime = subtask.getStartTime();
 		ArrayList<Subtask> subtaskList = new ArrayList<>();
 		for (Subtask sb : epic.getSubtasks()) {
 			if (Objects.equals(sb.getId(), subtask.getId())) {
@@ -182,8 +184,21 @@ public class InMemoryTaskManager implements TaskManager {
 			} else {
 				subtaskList.add(sb);
 			}
+			if (sb.getDuration() != null) {
+				totalTimeForSubtaskInMinutes += (sb.getDuration().getSeconds() / 60);
+			}
+			if(sb.getDuration() == null || sb.getDuration().getSeconds() < 0) {
+				sb.setDuration(Duration.ofSeconds(0));
+			}
+			if (startTime != null && startTime.isAfter(sb.getStartTime())) {
+				startTime = sb.getStartTime();//⌛
+			}
+		}
+		if (epic.getDuration() == null || epic.getDuration().getSeconds() > 0) {
+			epic.setDuration(Duration.ofSeconds(0));
 		}
 		epic.setSubtask(subtaskList);
+		epic.setDuration(epic.getDuration().plusMinutes(totalTimeForSubtaskInMinutes));
 		epic.updateStatus();
 	}
 	
@@ -192,37 +207,10 @@ public class InMemoryTaskManager implements TaskManager {
 		return historyManager.getHistory();
 	}
 	
-	@Override
-	public boolean isSubtaskTimeIntersect(Subtask newSubtask) {
-		Epic epic = getEpicTasks().get(newSubtask.getEpicId());
-		if (epic != null && isTimeOverlap(newSubtask, epic)) {
-			return true;
-		}
-		return getSubTasks().values().stream()
-				.filter(subtask -> !subtask.getId().equals(newSubtask.getId()) && subtask.getEpicId() == newSubtask.getEpicId())
-				.anyMatch(subtask -> isTimeOverlap(newSubtask, subtask));
-	}
 	
-	@Override
-	public boolean isTaskTimeIntersect(Task newTask) {
-		return getTasks().values().stream()
-				.filter(existingTask -> !existingTask.getId().equals(newTask.getId())) // исключаем новую задачу
-				.anyMatch(existingTask -> isTimeOverlap(newTask, existingTask));
+	private int getNewId() {
+		return idCounter++;
 	}
-	
-	@Override
-	public boolean isTimeOverlap(Task task1, Task task2) {
-		LocalDateTime start1 = task1.getStartTime();
-		LocalDateTime end1 = task1.getEndTime();
-		LocalDateTime start2 = task2.getStartTime();
-		LocalDateTime end2 = task2.getEndTime();
-		if (start1 == null || end1 == null || start2 == null || end2 == null) {
-			return false;
-		}
-		// Проверяем пересечения временных интервалов
-		return start1.isBefore(end2) && start2.isBefore(end1);
-	}
-	
 	
 	public HashMap<Integer, Task> getTasks() {
 		return tasks;
@@ -234,29 +222,5 @@ public class InMemoryTaskManager implements TaskManager {
 	
 	public HashMap<Integer, Epic> getEpicTasks() {
 		return epicTasks;
-	}
-	
-	public HistoryManager getHistoryManager() {
-		return historyManager;
-	}
-	
-	public void setHistoryManager(HistoryManager historyManager) {
-		this.historyManager = historyManager;
-	}
-	
-	public void setTasks(HashMap<Integer, Task> tasks) {
-		this.tasks = tasks;
-	}
-	
-	public void setEpicTasks(HashMap<Integer, Epic> epicTasks) {
-		this.epicTasks = epicTasks;
-	}
-	
-	public void setSubTasks(HashMap<Integer, Subtask> subTasks) {
-		this.subTasks = subTasks;
-	}
-	
-	private int getNewId() {
-		return idCounter++;
 	}
 }

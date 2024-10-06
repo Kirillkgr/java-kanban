@@ -1,6 +1,7 @@
 package Models;
 
 import Enums.TaskStatus;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -11,8 +12,8 @@ public class Task {
 	protected String name;
 	protected String description;
 	protected TaskStatus status;
-	protected Duration duration; // новое поле для продолжительности
-	protected LocalDateTime startTime; // новое поле для времени начала
+	private LocalDateTime startTime; // дата и время начала задачи
+	private Duration duration; // продолжительность задачи
 	
 	public Task(String name, String description) {
 		this.name = name;
@@ -32,6 +33,7 @@ public class Task {
 		this.name = name;
 		this.status = status;
 		this.description = description;
+		this.status = TaskStatus.NEW;
 	}
 	
 	public Task(Task task) {
@@ -39,16 +41,23 @@ public class Task {
 		this.name = task.name;
 		this.description = task.description;
 		this.status = task.status;
-		this.duration = task.duration;
-		this.startTime = task.startTime;
 	}
 	
-	public Task(String name, String description, LocalDateTime startTime, int timeDurationInMinutes) {
+	public Task(int id, String name, String description, TaskStatus taskStatus, Duration duration, LocalDateTime startTime) {
+		this.id = id;
 		this.name = name;
+		this.status = taskStatus;
 		this.description = description;
-		this.status = TaskStatus.NEW;
 		this.startTime = startTime;
-		this.duration = Duration.ofMinutes(timeDurationInMinutes);
+		this.duration = duration;
+	}
+	
+	// Метод для получения даты и времени завершения задачи
+	public LocalDateTime getEndTime() {
+		if (startTime != null && duration != null) {
+			return startTime.plus(duration);
+		}
+		return null;
 	}
 	
 	public Integer getId() {
@@ -83,14 +92,6 @@ public class Task {
 		this.status = status;
 	}
 	
-	public Duration getDuration() {
-		return duration;
-	}
-	
-	public void setDuration(Duration duration) {
-		this.duration = duration;
-	}
-	
 	public LocalDateTime getStartTime() {
 		return startTime;
 	}
@@ -99,12 +100,12 @@ public class Task {
 		this.startTime = startTime;
 	}
 	
-	// Метод для вычисления времени завершения задачи
-	public LocalDateTime getEndTime() {
-		if (startTime != null && duration != null) {
-			return startTime.plus(duration);
-		}
-		return null;
+	public Duration getDuration() {
+		return duration;
+	}
+	
+	public void setDuration(Duration duration) {
+		this.duration = duration;
 	}
 	
 	@Override
@@ -114,8 +115,6 @@ public class Task {
 			   ", name='" + name + '\'' +
 			   ", description='" + description + '\'' +
 			   ", status=" + status +
-			   ", startTime=" + startTime +
-			   ", duration=" + duration +
 			   '}';
 	}
 	
@@ -129,6 +128,8 @@ public class Task {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return Objects.hashCode(id);
 	}
+	
+	
 }
