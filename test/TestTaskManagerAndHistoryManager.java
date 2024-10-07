@@ -40,7 +40,7 @@ class TestTaskManagerAndHistoryManager {
         taskManager.createEpicTask(epic);
         assertEquals(epic.getId(), 3);
 
-        Subtask subtask = new Subtask("Test subtask", "Test deicri[tion", epic.getId());
+        Subtask subtask = new Subtask("Test subtask", "Test description", epic.getId());
         subtask = taskManager.createSubTask(subtask);
         assertEquals(subtask.getId(), 4);
 

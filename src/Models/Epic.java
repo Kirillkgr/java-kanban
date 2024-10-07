@@ -2,10 +2,10 @@ package Models;
 
 import Enums.TaskStatus;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
-// Класс для эпиков
 public class Epic extends Task {
     private ArrayList<Subtask> subtasks;
 
@@ -26,12 +26,20 @@ public class Epic extends Task {
         }
         this.subtasks = newSubtasks;
     }
-
+	public Epic(int id, String name, TaskStatus taskStatus, String description, Duration duration, LocalDateTime startTime) {
+		super(id, name, description, taskStatus, duration, startTime);
+		this.subtasks = new ArrayList<>();
+	}
+	
     public void setSubtask(ArrayList<Subtask> subtasks) {
         this.subtasks = subtasks;
     }
 
     public void addSubtask(Subtask subtask) {
+        if(this.getDuration() == null) {
+            this.setDuration(Duration.ZERO);
+        }
+        this.setDuration(this.getDuration().plus(subtask.getDuration()==null?Duration.ZERO:subtask.getDuration()));
         this.subtasks.add(subtask);
     }
 
