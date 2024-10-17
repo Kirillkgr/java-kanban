@@ -5,6 +5,8 @@ import Models.Epic;
 import Models.Subtask;
 import Models.Task;
 
+import Server.HttpTaskServer;
+import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,6 +16,9 @@ public class Main {
 	
 	public static void main(String[] args) {
 		System.out.println("Поехали!");
+		HttpTaskServer httpTaskServer = new HttpTaskServer();
+		httpTaskServer.start();
+		
 		TaskManager tracker = new FileBackedTaskManager(new File(System.getProperty("user.home") + File.separator + "tasks.csv"));
 		
 		Task task1 = new Task("Task 1", "Description task 1");
@@ -51,8 +56,8 @@ public class Main {
 		subtask2.setStartTime(LocalDateTime.now().plusHours(3));
 		subtask2.setDuration(Duration.ofMinutes(30));
 		
-		subtask3.setStartTime(LocalDateTime.now().plusHours(4));
-		subtask3.setDuration(Duration.ofMinutes(120));
+		subtask3.setStartTime(LocalDateTime.now().plusHours(5));
+		subtask3.setDuration(Duration.ofMinutes(10));
 		
 		subtask1.setEpicId(epic1.getId());
 		subtask2.setEpicId(epic1.getId());
@@ -117,28 +122,28 @@ public class Main {
 		tracker.getEpicTaskById(epic2.getId());
 		tracker.getSubTaskById(subtask4.getId());
 		tracker.getTaskById(task2.getId());
-		tracker.getSubTaskById(subtask2.getId());
+//		tracker.getSubTaskById(subtask2.getId());
 		
 		System.out.println("\nИстория после различных запросов:");
 		System.out.println(tracker.getHistory());
 		
-//		// 4. Удаление задачи, которая есть в истории, и проверка истории
-//		tracker.removeTaskById(task2.getId());
-//		System.out.println("\nИстория после удаления Task 2:");
-//		System.out.println(tracker.getHistory());
-//
-//		// 5. Удаление эпика с тремя подзадачами и проверка истории
-//		tracker.removeEpicById(epic2.getId());
-//		System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
-//		System.out.println(tracker.getHistory());
-//
-//		tracker.removeAllTasks();
-//		System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
-//		tracker.removeAllSubTasks();
-//		System.out.println("\nУдаление всех Subtask задачь \n" + tracker.getAllSubtasks());
-//
-//		tracker.removeAllEpicTasks();
-//		System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
+		// 4. Удаление задачи, которая есть в истории, и проверка истории
+		tracker.removeTaskById(task2.getId());
+		System.out.println("\nИстория после удаления Task 2:");
+		System.out.println(tracker.getHistory());
+
+		// 5. Удаление эпика с тремя подзадачами и проверка истории
+		tracker.removeEpicById(epic2.getId());
+		System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
+		System.out.println(tracker.getHistory());
+
+		tracker.removeAllTasks();
+		System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
+		tracker.removeAllSubTasks();
+		System.out.println("\nУдаление всех Subtask задачь \n" + tracker.getAllSubtasks());
+
+		tracker.removeAllEpicTasks();
+		System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 		
 		// Проверка работы FileBackedTaskManager
 		File file = new File(System.getProperty("user.home") + File.separator + "tasks.csv");

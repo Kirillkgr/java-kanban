@@ -38,10 +38,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	@Override
-	public void createTask(Task task) {
+	public int createTask(Task task) {
 		super.getPrioritizedTasks().add(task);
-		super.createTask(task);
+		int taskId = super.createTask(task);
 		save();
+		return taskId;
 	}
 	
 	
@@ -58,26 +59,31 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	@Override
-	public void removeSubTaskById(int id) {
-		Subtask subtask = (Subtask) getSubTaskById(id);
+	public boolean removeSubTaskById(int id) {
+		Subtask subtask = null;
+		if (getSubTaskById(id).isPresent())
+			subtask = (Subtask) getSubTaskById(id).get();
 		if (subtask != null) {
 			super.getPrioritizedTasks().remove(subtask);
 		}
-		super.removeSubTaskById(id);
+		boolean isRemoved = super.removeSubTaskById(id);
 		save();
+		return isRemoved;
 	}
 	
 	@Override
-	public void removeTaskById(int id) {
-		super.removeTaskById(id);
+	public boolean removeTaskById(int id) {
+		boolean isRemoved = super.removeTaskById(id);
 		save();
+		return isRemoved;
 	}
 	
 	@Override
-	public void updateSubtask(Subtask subtask) {
-		super.updateSubtask(subtask);
+	public boolean updateSubtask(Subtask subtask) {
+		boolean isUpdated = super.updateSubtask(subtask);
 		super.getPrioritizedTasks().add(subtask);
 		save();
+		return isUpdated;
 	}
 	
 	public Epic addEpic(Epic epic) {

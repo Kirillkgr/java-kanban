@@ -4,6 +4,7 @@ import Manager.Managers;
 import Models.Epic;
 import Models.Subtask;
 import Models.Task;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,7 @@ class TestTaskManagerAndHistoryManager {
         assertEquals(epic.getId(), 3);
 
         Subtask subtask = new Subtask("Test subtask", "Test description", epic.getId());
-        subtask = taskManager.createSubTask(subtask);
+         taskManager.createSubTask(subtask);
         assertEquals(subtask.getId(), 4);
 
     }
@@ -118,10 +119,10 @@ class TestTaskManagerAndHistoryManager {
     void testTaskImmutabilityWhenAddedToManager() {
         Task task = new Task("Task 1", "Description 1");
         taskManager.createTask(task);
-
-        Task retrievedTask = taskManager.getTaskById(task.getId());
+        
+        Optional<Task> retrievedTask = taskManager.getTaskById(task.getId());
         assertEquals(task, retrievedTask);
-        assertEquals(task.getName(), retrievedTask.getName());
+        assertEquals(task.getName(), retrievedTask.get().getName());
     }
 
     @Test
@@ -132,10 +133,10 @@ class TestTaskManagerAndHistoryManager {
 
         task.setName("Updated Task 1");
         taskManager.updateTask(task);
-
-        Task actualTask = taskManager.getTaskById(task.getId());
+        
+        Optional<Task>  actualTask = taskManager.getTaskById(task.getId());
         Task fromHistory = historyManager.getHistory().getFirst();
-        assertEquals(actualTask.getId(), fromHistory.getId());
+        assertEquals(actualTask.get().getId(), fromHistory.getId());
         assertEquals("Description 1", fromHistory.getDescription());
     }
 }

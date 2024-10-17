@@ -5,6 +5,7 @@ import Models.Subtask;
 import Models.Task;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskManager {
 	
@@ -17,27 +18,27 @@ public interface TaskManager {
 	
 	void removeAllSubTasks();
 	
-	Task getTaskById(int id);
+	Optional<Task> getTaskById(int id);
 	
 	Task getEpicTaskById(int id);
 	
-	Task getSubTaskById(int id);
+	Optional<Subtask> getSubTaskById(int id);
 	
-	void createTask(Task task);
+	int createTask(Task task);
 	
 	Epic createEpicTask(Epic epic);
 	
-	Subtask createSubTask(Subtask subtask);
+	boolean createSubTask(Subtask subtask);
 	
-	void updateTask(Task updatedTask);
+	Task updateTask(Task updatedTask);
 	
 	void updateEpic(Epic epic);
 	
 	void removeEpicById(int id);
 	
-	void removeSubTaskById(int id);
+	boolean removeSubTaskById(int id);
 	
-	void removeTaskById(int id);
+	boolean removeTaskById(int id);
 	
 	List<Subtask> getSubtasksOfEpic(int epicId);
 	
@@ -45,7 +46,7 @@ public interface TaskManager {
 	
 	List<Subtask> getAllSubtasks();
 	
-	void updateSubtask(Subtask subtask);
+	boolean updateSubtask(Subtask subtask);
 	
 	List<Task> getHistory();
 	
