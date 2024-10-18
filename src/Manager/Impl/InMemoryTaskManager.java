@@ -56,7 +56,11 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 	
 	@Override
-	public Optional<Task> getTaskById(int id) {
+	public Optional<Task> getTaskById(Integer id) {
+		if (id == null || id == -1||tasks.get(id) == null) {
+			System.out.println("Введено некорректное значение id");
+			return Optional.empty();
+		}
 		historyManager.add(tasks.get(id));
 		return Optional.ofNullable(tasks.get(id));
 	}
@@ -77,9 +81,12 @@ public class InMemoryTaskManager implements TaskManager {
 	
 	@Override
 	public int createTask(Task task) {
-		task.setId(getNewId());
-		tasks.put(task.getId(), task);
-		return task.getId();
+		if (!isTaskTimeIntersect(task)) {
+			task.setId(getNewId());
+			tasks.put(task.getId(), task);
+			return task.getId();
+		}
+		return -1;
 	}
 	
 	@Override
@@ -152,7 +159,11 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 	
 	@Override
-	public boolean removeTaskById(int id) {
+	public boolean removeTaskById(Integer id) {
+		if (id == null || id ==-1 || !tasks.containsKey(id)) {
+			System.out.println("Введено некорректное значение id");
+			return false;
+		}
 		tasks.remove(id);
 		return !tasks.containsKey(id);
 		
@@ -184,7 +195,7 @@ public class InMemoryTaskManager implements TaskManager {
 	
 	@Override
 	public boolean updateSubtask(Subtask subtask) {
-		if (!isTaskTimeIntersect(subtask)) {
+		if (!isTaskTimeIntersect(subtask)&&subTasks.containsKey(subtask.getId())) {
 			Epic epic = epicTasks.get(subtask.getEpicId());
 			long totalTimeForSubtaskInMinutes = 0;
 			LocalDateTime startTime = subtask.getStartTime();
@@ -222,10 +233,6 @@ public class InMemoryTaskManager implements TaskManager {
 		return historyManager.getHistory();
 	}
 	
-	@Override
-	public boolean isSubtaskTimeIntersect(Subtask newSubtask) {
-		return false;
-	}
 	
 	@Override
 	public boolean isTaskTimeIntersect(Task newTask) {
@@ -252,10 +259,7 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 	
 	
-	@Override
-	public boolean isTimeOverlap(Task task1, Task task2) {
-		return false;
-	}
+	
 	
 	
 	private int getNewId() {

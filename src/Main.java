@@ -6,7 +6,6 @@ import Models.Subtask;
 import Models.Task;
 
 import Server.HttpTaskServer;
-import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -50,13 +49,13 @@ public class Main {
 		Subtask subtask2 = new Subtask("Subtask 2", "Description of Subtask 2", epic1.getId());
 		Subtask subtask3 = new Subtask("Subtask 3", "Description of Subtask 3", epic1.getId());
 		
-		subtask1.setStartTime(LocalDateTime.now().plusHours(1));
-		subtask1.setDuration(Duration.ofMinutes(45));
+		subtask1.setStartTime(LocalDateTime.now().plusHours(5));
+		subtask1.setDuration(Duration.ofMinutes(10));
 		
-		subtask2.setStartTime(LocalDateTime.now().plusHours(3));
-		subtask2.setDuration(Duration.ofMinutes(30));
+		subtask2.setStartTime(LocalDateTime.now().plusHours(6));
+		subtask2.setDuration(Duration.ofMinutes(10));
 		
-		subtask3.setStartTime(LocalDateTime.now().plusHours(5));
+		subtask3.setStartTime(LocalDateTime.now().plusHours(7));
 		subtask3.setDuration(Duration.ofMinutes(10));
 		
 		subtask1.setEpicId(epic1.getId());

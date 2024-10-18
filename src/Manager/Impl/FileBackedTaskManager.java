@@ -39,8 +39,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	
 	@Override
 	public int createTask(Task task) {
-		super.getPrioritizedTasks().add(task);
 		int taskId = super.createTask(task);
+		if (taskId == -1)
+			return -1;
+		super.getPrioritizedTasks().add(task);
 		save();
 		return taskId;
 	}
@@ -62,7 +64,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	public boolean removeSubTaskById(int id) {
 		Subtask subtask = null;
 		if (getSubTaskById(id).isPresent())
-			subtask = (Subtask) getSubTaskById(id).get();
+			subtask = getSubTaskById(id).get();
 		if (subtask != null) {
 			super.getPrioritizedTasks().remove(subtask);
 		}
@@ -72,10 +74,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	@Override
-	public boolean removeTaskById(int id) {
+	public boolean removeTaskById(Integer id) {
 		boolean isRemoved = super.removeTaskById(id);
-		save();
+		if (isRemoved) {
+			save();
+		}
 		return isRemoved;
+		
 	}
 	
 	@Override

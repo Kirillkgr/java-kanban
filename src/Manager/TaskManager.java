@@ -18,7 +18,7 @@ public interface TaskManager {
 	
 	void removeAllSubTasks();
 	
-	Optional<Task> getTaskById(int id);
+	Optional<Task> getTaskById(Integer id);
 	
 	Task getEpicTaskById(int id);
 	
@@ -38,7 +38,7 @@ public interface TaskManager {
 	
 	boolean removeSubTaskById(int id);
 	
-	boolean removeTaskById(int id);
+	boolean removeTaskById(Integer id);
 	
 	List<Subtask> getSubtasksOfEpic(int epicId);
 	
@@ -50,11 +50,5 @@ public interface TaskManager {
 	
 	List<Task> getHistory();
 	
-	
-	boolean isSubtaskTimeIntersect(Subtask newSubtask);
-	
 	boolean isTaskTimeIntersect(Task newTask);
-	
-	boolean isTimeOverlap(Task task1, Task task2);
-	
 }

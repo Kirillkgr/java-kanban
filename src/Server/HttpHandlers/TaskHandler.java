@@ -1,11 +1,11 @@
 package Server.HttpHandlers;
 
+import Enums.TaskStatus;
 import Manager.TaskManager;
 import Models.Task;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,45 +49,55 @@ public class TaskHandler extends AbstractHandler {
 	
 	// Метод для получения задачи по ID
 	private void handleGetTaskById(HttpExchange exchange) throws IOException {
+		int codedStatus = 200;
 		String[] pathSegments = exchange.getRequestURI().getPath().split("/");
 		int id = Integer.parseInt(pathSegments[pathSegments.length - 1]);
 		
 		Optional<Task> taskOptional = getTaskManager().getTaskById(id);
-		ParserTask(exchange, taskOptional.isPresent(), taskOptional.get());
+		if (taskOptional.isEmpty()) {
+			codedStatus = 404;
+		}
+		ParserTask(exchange, codedStatus == 200, taskOptional.orElse(null), codedStatus);
 	}
 	
-	static void ParserTask(HttpExchange exchange, boolean present, Task task) throws IOException {
+	static void ParserTask(HttpExchange exchange, boolean present, Task task, int codedStatus) throws IOException {
 		if (present) {
 			String response = toJson(task);
-			sendResponse(exchange, 200, response);
+			sendResponse(exchange, codedStatus, response);
 		} else {
-			exchange.sendResponseHeaders(404, -1); // Если задачи с таким ID нет
+			exchange.sendResponseHeaders(codedStatus, -1); // Если задачи с таким ID нет
 		}
 	}
 	
 	// Метод для создания или обновления задачи
 	private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException {
 		String requestBody = new String(exchange.getRequestBody().readAllBytes());
-		if (requestBody==null || requestBody.isEmpty()) {
+		if (requestBody == null || requestBody.isEmpty()) {
 			exchange.sendResponseHeaders(400, -1); // Ошибка в запросе
 			return;
 		}
 		
 		Task task = fromJson(requestBody, Task.class);
-		
+		int newTaskId;
+		int codedStatus = 200;
 		if (task.getId() == null) {
-			int newTaskId = getTaskManager().createTask(task);
-			exchange.sendResponseHeaders(201, 0); // Успешное создание задачи
+			task.setStatus(task.getStatus() == null ? TaskStatus.NEW : task.getStatus());
+			newTaskId = getTaskManager().createTask(task);
+			codedStatus = 201;
 		} else {
-			int hashBefore = task.hashCode();
-			int hashAfter = getTaskManager().updateTask(task).hashCode();
-			if (hashBefore == hashAfter) {
-				exchange.sendResponseHeaders(200, 0); // Успешное обновление задачи
-			} else {
-				exchange.sendResponseHeaders(409, -1); // Конфликт — пересечение с существующими задачами
-			}
+			newTaskId = getTaskManager().updateTask(task).hashCode();
+			
 		}
+		responseTimeIntersectionAnswer(exchange, newTaskId, codedStatus);
 		exchange.getResponseBody().close();
+	}
+	
+	private static void responseTimeIntersectionAnswer(HttpExchange exchange, int newTaskId, int codedStatus) throws IOException {
+		if (newTaskId != -1) {
+			exchange.sendResponseHeaders(codedStatus, 0); // Успешное обновление задачи
+		} else {
+			exchange.sendResponseHeaders(codedStatus, -1); // Конфликт — пересечение с существующими задачами
+		}
 	}
 	
 	// Метод для удаления задачи по ID

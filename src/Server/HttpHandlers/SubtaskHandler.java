@@ -2,7 +2,6 @@ package Server.HttpHandlers;
 
 import Manager.TaskManager;
 import Models.Subtask;
-import com.sun.net.httpserver.HttpHandler;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
@@ -10,7 +9,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 
-public class SubtaskHandler extends AbstractHandler  {
+public class SubtaskHandler extends AbstractHandler {
 	public SubtaskHandler(TaskManager manager) {
 		super(manager);
 	}
@@ -50,11 +49,12 @@ public class SubtaskHandler extends AbstractHandler  {
 	
 	// Метод для получения подзадачи по ID
 	private void handleGetSubtaskById(HttpExchange exchange) throws IOException {
+		int codedStatus = 200;
 		String[] pathSegments = exchange.getRequestURI().getPath().split("/");
 		int id = Integer.parseInt(pathSegments[pathSegments.length - 1]);
 		
 		Optional<Subtask> subtaskOptional = getTaskManager().getSubTaskById(id);
-		TaskHandler.ParserTask(exchange, subtaskOptional.isPresent(), subtaskOptional.get());
+		TaskHandler.ParserTask(exchange, subtaskOptional.isPresent(), subtaskOptional.get(), codedStatus);
 	}
 	
 	// Метод для создания или обновления подзадачи
