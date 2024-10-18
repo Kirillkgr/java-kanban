@@ -11,6 +11,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -27,8 +28,11 @@ public abstract class AbstractHandler implements HttpHandler {
 		gson = gsonBuilder.create();
 	}
 	
+	
 	public static void sendResponse(HttpExchange exchange, int codeResponse, String response) throws IOException {
-		exchange.sendResponseHeaders(codeResponse, response.length());
+		byte[] resp = response.getBytes(StandardCharsets.UTF_8);
+		exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+		exchange.sendResponseHeaders(codeResponse, resp.length);
 		OutputStream os = exchange.getResponseBody();
 		os.write(response.getBytes());
 		os.close();
