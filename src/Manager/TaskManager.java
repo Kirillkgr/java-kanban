@@ -6,6 +6,7 @@ import Models.Task;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeSet;
 
 public interface TaskManager {
 	
@@ -34,7 +35,7 @@ public interface TaskManager {
 	
 	void updateEpic(Epic epic);
 	
-	void removeEpicById(int id);
+	boolean removeEpicById(int id);
 	
 	boolean removeSubTaskById(int id);
 	
@@ -51,4 +52,6 @@ public interface TaskManager {
 	List<Task> getHistory();
 	
 	boolean isTaskTimeIntersect(Task newTask);
+	
+	TreeSet<Task> getPrioritizedTasks();
 }
