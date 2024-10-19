@@ -3,6 +3,9 @@ package Server;
 import Exeptions.ServerException;
 import Manager.Impl.FileBackedTaskManager;
 import Manager.TaskManager;
+import Server.HttpHandlers.EpicsHandler;
+import Server.HttpHandlers.HistoryHandler;
+import Server.HttpHandlers.PrioritizedHandler;
 import Server.HttpHandlers.SubtaskHandler;
 import Server.HttpHandlers.TaskHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -21,9 +24,9 @@ public class HttpTaskServer {
 			
 			httpServer.createContext("/tasks", new TaskHandler(taskManager));
 			httpServer.createContext("/subtasks", new SubtaskHandler(taskManager));
-//			httpServer.createContext("/epics", new EpicsHandler());
-//			httpServer.createContext("/history", new HistoryHandler());
-//			httpServer.createContext("/prioritized", new PrioritizedHandler());
+			httpServer.createContext("/epics", new EpicsHandler(taskManager));
+			httpServer.createContext("/history", new HistoryHandler(taskManager));
+			httpServer.createContext("/prioritized", new PrioritizedHandler(taskManager));
 			
 			
 		} catch (IOException e) {
