@@ -52,6 +52,15 @@ public class Task {
 		this.duration = duration;
 	}
 	
+	public Task(String name, String description, TaskStatus taskStatus, Duration duration, LocalDateTime now) {
+		this.name = name;
+		this.description = description;
+		this.status = taskStatus;
+		this.startTime = now;
+		this.duration = duration;
+		
+	}
+	
 	// Метод для получения даты и времени завершения задачи
 	public LocalDateTime getEndTime() {
 		if (startTime != null && duration != null) {
