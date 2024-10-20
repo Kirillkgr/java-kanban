@@ -169,5 +169,7 @@ public class Main {
 		
 		System.out.println(manager1.getTasks().equals(manager2.getTasks()));  // true
 		System.out.println(manager1.getEpicTasks().equals(manager2.getEpicTasks()));  // true
+		
+		httpTaskServer.stop(); // Завершение работы сервера
 	}
 }
