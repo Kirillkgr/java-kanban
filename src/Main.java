@@ -121,7 +121,7 @@ public class Main {
 		tracker.getEpicTaskById(epic2.getId());
 		tracker.getSubTaskById(subtask4.getId());
 		tracker.getTaskById(task2.getId());
-//		tracker.getSubTaskById(subtask2.getId());
+		tracker.getSubTaskById(subtask2.getId());
 		
 		System.out.println("\nИстория после различных запросов:");
 		System.out.println(tracker.getHistory());
@@ -130,17 +130,17 @@ public class Main {
 		tracker.removeTaskById(task2.getId());
 		System.out.println("\nИстория после удаления Task 2:");
 		System.out.println(tracker.getHistory());
-
+		
 		// 5. Удаление эпика с тремя подзадачами и проверка истории
 		tracker.removeEpicById(epic2.getId());
 		System.out.println("\nИстория после удаления Epic 2 и его подзадач:");
 		System.out.println(tracker.getHistory());
-
+		
 		tracker.removeAllTasks();
 		System.out.println("\nУдаление всех Task задачь \n" + tracker.getAllTasks());
 		tracker.removeAllSubTasks();
 		System.out.println("\nУдаление всех Subtask задачь \n" + tracker.getAllSubtasks());
-
+		
 		tracker.removeAllEpicTasks();
 		System.out.println("\nУдаление всех Epic задачь \n" + tracker.getAllEpics());
 		
@@ -149,12 +149,12 @@ public class Main {
 		
 		FileBackedTaskManager manager1 = new FileBackedTaskManager(file);
 		Task taskForTestFile1 = new Task(1, "taskForTestFile 1", TaskStatus.NEW, "Description taskForTestFile1");
-		Epic epicForTestFile1 = new Epic(2, "epicForTestFile 1", TaskStatus.NEW, "Description epicForTestFile1",new ArrayList<>());
+		Epic epicForTestFile1 = new Epic(2, "epicForTestFile 1", TaskStatus.NEW, "Description epicForTestFile1", new ArrayList<>());
 		
 		taskForTestFile1.setDuration(Duration.ofMinutes(4));
 		taskForTestFile1.setStartTime(LocalDateTime.now());
 		
-		Subtask subTaskForTestFile = new Subtask(1, "SubTaskForTestFile 1", TaskStatus.NEW, "Description taskForTestFile1",epicForTestFile1.getId());
+		Subtask subTaskForTestFile = new Subtask(1, "SubTaskForTestFile 1", TaskStatus.NEW, "Description taskForTestFile1", epicForTestFile1.getId());
 		subTaskForTestFile.setDuration(Duration.ofMinutes(4));
 		subTaskForTestFile.setStartTime(LocalDateTime.now());
 		
