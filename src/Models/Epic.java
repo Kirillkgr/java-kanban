@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Epic extends Task {
-	private ArrayList<Subtask> subtasks;
-	
 	public Epic(String name, String description) {
 		super(name, description);
 		this.subtasks = new ArrayList<>();
@@ -31,6 +29,15 @@ public class Epic extends Task {
 	public Epic(int id, String name, TaskStatus taskStatus, String description, Duration duration, LocalDateTime startTime) {
 		super(id, name, description, taskStatus, duration, startTime);
 		this.subtasks = new ArrayList<>();
+	}
+	
+	public Epic(String name, String epicDescription, TaskStatus taskStatus, Duration duration, LocalDateTime startTime) {
+		super(name, epicDescription, taskStatus, duration, startTime);
+		this.subtasks = new ArrayList<>();
+	}
+	
+	public Epic(int id, String name, String description, TaskStatus taskStatus, Duration duration, LocalDateTime now) {
+		super(id, name, description, taskStatus, duration, now);
 	}
 	
 	public void setSubtask(ArrayList<Subtask> subtasks) {
@@ -98,4 +105,6 @@ public class Epic extends Task {
 			   ", subtasks=" + subtasks +
 			   '}';
 	}
+	
+	private ArrayList<Subtask> subtasks;
 }
