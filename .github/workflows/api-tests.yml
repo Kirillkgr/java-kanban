@@ -21,4 +21,4 @@ jobs:
 
       - name: Build and run project
         run: |
-          javac -d target -cp src src/*.java && java -cp target Main;
+          javac -d target -cp "src:lib/gson-2.11.0.jar" src/*.java && java -cp "target:lib/gson-2.11.0.jar" Main

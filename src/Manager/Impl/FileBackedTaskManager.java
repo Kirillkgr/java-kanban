@@ -38,10 +38,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	@Override
-	public void createTask(Task task) {
+	public int createTask(Task task) {
+		int taskId = super.createTask(task);
+		if (taskId == -1)
+			return -1;
 		super.getPrioritizedTasks().add(task);
-		super.createTask(task);
 		save();
+		return taskId;
 	}
 	
 	
@@ -52,32 +55,42 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	}
 	
 	@Override
-	public void removeEpicById(int id) {
-		super.removeEpicById(id);
-		save();
+	public boolean removeEpicById(int id) {
+		if (super.removeEpicById(id)) {
+			save();
+		}
+		return false;
 	}
 	
 	@Override
-	public void removeSubTaskById(int id) {
-		Subtask subtask = (Subtask) getSubTaskById(id);
+	public boolean removeSubTaskById(int id) {
+		Subtask subtask = null;
+		if (getSubTaskById(id).isPresent())
+			subtask = getSubTaskById(id).get();
 		if (subtask != null) {
 			super.getPrioritizedTasks().remove(subtask);
 		}
-		super.removeSubTaskById(id);
+		boolean isRemoved = super.removeSubTaskById(id);
 		save();
+		return isRemoved;
 	}
 	
 	@Override
-	public void removeTaskById(int id) {
-		super.removeTaskById(id);
-		save();
+	public boolean removeTaskById(Integer id) {
+		boolean isRemoved = super.removeTaskById(id);
+		if (isRemoved) {
+			save();
+		}
+		return isRemoved;
+		
 	}
 	
 	@Override
-	public void updateSubtask(Subtask subtask) {
-		super.updateSubtask(subtask);
+	public boolean updateSubtask(Subtask subtask) {
+		boolean isUpdated = super.updateSubtask(subtask);
 		super.getPrioritizedTasks().add(subtask);
 		save();
+		return isUpdated;
 	}
 	
 	public Epic addEpic(Epic epic) {
