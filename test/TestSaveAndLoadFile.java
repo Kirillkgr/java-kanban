@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestSaveAnLoadFile {
+public class TestSaveAndLoadFile {
 
     private FileBackedTaskManager manager;
     private static File tempFile;
